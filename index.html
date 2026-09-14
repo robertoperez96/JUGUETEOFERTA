@@ -75,36 +75,59 @@
 
   /* ---------- hero ---------- */
   .hero{
-    position:relative;padding:34px 0 26px;text-align:center;overflow:hidden;
+    position:relative;padding:22px 0;overflow:hidden;
     background:
       radial-gradient(420px 220px at 12% 0%, rgba(244,68,46,.14), transparent 65%),
       radial-gradient(420px 240px at 88% 10%, rgba(46,168,224,.16), transparent 65%),
       radial-gradient(360px 220px at 50% 100%, rgba(61,220,132,.14), transparent 65%),
       radial-gradient(360px 200px at 100% 90%, rgba(255,201,60,.20), transparent 65%);
   }
-  .hero-logo-wrap{position:relative;display:inline-block;margin-bottom:6px;}
+  .hero-inner{
+    display:flex;flex-direction:column;align-items:center;
+    gap:14px;text-align:center;
+  }
+  .hero-text{display:flex;flex-direction:column;align-items:center;}
+  .hero-logo-wrap{position:relative;display:inline-block;flex-shrink:0;}
   .hero-logo-glow{
-    position:absolute;inset:-18px;border-radius:50%;
+    position:absolute;inset:-16px;border-radius:50%;
     background:conic-gradient(from 0deg, var(--rojo), var(--amarillo), var(--verde), var(--azul), var(--rojo));
-    filter:blur(18px);opacity:.35;z-index:0;
+    filter:blur(16px);opacity:.35;z-index:0;
     animation:spin-glow 8s linear infinite;
   }
   @keyframes spin-glow{ to{ transform:rotate(360deg); } }
   .hero-logo{
-    position:relative;z-index:1;width:clamp(120px,28vw,170px);height:clamp(120px,28vw,170px);
-    object-fit:contain;background:var(--blanco);border-radius:32px;padding:10px;
+    position:relative;z-index:1;width:clamp(96px,22vw,130px);height:clamp(96px,22vw,130px);
+    object-fit:contain;background:var(--blanco);border-radius:28px;padding:8px;
     box-shadow:var(--sombra-fuerte);border:4px solid var(--blanco);
   }
-  .hero h1{font-size:clamp(24px,4vw,34px);color:var(--tinta);margin-top:14px;}
+  .hero h1{font-size:clamp(22px,3.6vw,32px);color:var(--tinta);line-height:1.15;}
   .hero h1 span{color:var(--rojo);}
-  .hero p{color:var(--tinta-suave);font-size:15px;margin:8px 0 0;font-weight:700;}
-  .search-wrap{max-width:420px;margin:18px auto 0;position:relative;}
+  .hero p{color:var(--tinta-suave);font-size:14.5px;margin:6px 0 0;font-weight:700;}
+  .search-wrap{width:100%;max-width:400px;margin:14px auto 0;position:relative;}
   .search-wrap input{
     width:100%;padding:13px 18px 13px 42px;border-radius:999px;border:2px solid var(--borde);
     font-family:inherit;font-size:14.5px;font-weight:700;color:var(--tinta);background:var(--blanco);
   }
   .search-wrap input:focus{outline:none;border-color:var(--azul);}
   .search-wrap .lupa{position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:16px;opacity:.5;}
+
+  /* en pantallas grandes: texto a la izquierda, logo grande a la derecha,
+     así el hero queda más corto (menos alto) y no todo centrado */
+  @media (min-width:760px){
+    .hero{padding:36px 0;}
+    .hero-inner{
+      flex-direction:row-reverse;align-items:center;justify-content:space-between;
+      gap:36px;text-align:left;
+    }
+    .hero-text{align-items:flex-start;max-width:560px;}
+    .hero p{margin-top:8px;}
+    .search-wrap{margin:20px 0 0;}
+    .hero-logo-glow{inset:-22px;}
+    .hero-logo{
+      width:clamp(160px,16vw,210px);height:clamp(160px,16vw,210px);
+      border-radius:36px;padding:12px;
+    }
+  }
 
   /* ---------- categorías ---------- */
   .cat-nav{position:sticky;top:76px;z-index:50;background:var(--crema);padding:12px 0;border-bottom:1px solid var(--borde);}
@@ -311,16 +334,18 @@
 </header>
 
 <section class="hero">
-  <div class="wrap">
+  <div class="wrap hero-inner">
     <div class="hero-logo-wrap">
       <div class="hero-logo-glow"></div>
       <img class="hero-logo" src="logo.png" alt="Juguete Oferta MX">
     </div>
-    <h1>Los mejores <span>juguetes</span>, al mejor precio</h1>
-    <p>Aparta el tuyo y confirma por WhatsApp 🎉</p>
-    <div class="search-wrap">
-      <span class="lupa">🔎</span>
-      <input id="searchInput" type="text" placeholder="Busca un juguete…">
+    <div class="hero-text">
+      <h1>Los mejores <span>juguetes</span>, al mejor precio</h1>
+      <p>Aparta el tuyo y confirma por WhatsApp 🎉</p>
+      <div class="search-wrap">
+        <span class="lupa">🔎</span>
+        <input id="searchInput" type="text" placeholder="Busca un juguete…">
+      </div>
     </div>
   </div>
 </section>
