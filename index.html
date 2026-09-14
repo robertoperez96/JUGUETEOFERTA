@@ -456,7 +456,7 @@
 /* =====================================================================
    CONFIGURACIÓN — esto es lo único que hay que ajustar al publicar.
    ===================================================================== */
-const WORKER_URL = "https://juguetoferta.roberto-perezc96.workers.dev"; // <-- URL de tu Worker "juguetoferta"
+const WORKER_URL = "https://jugueteoferta.roberto-perezc96.workers.dev"; // <-- URL de tu Worker "jugueteoferta"
 const WHATSAPP_PHONE = "529931762263"; // WhatsApp del negocio, formato: 52 + 10 dígitos
 
 const CATEGORIES = [
@@ -875,7 +875,7 @@ $("#productSaveBtn").addEventListener("click", async () => {
   };
 
   try {
-    const res = await fetch(`${WORKER_URL}/admin/save-product`, {
+    const res = await fetch(`${WORKER_URL}/guardar-producto`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ password: getAdminPassword(), product }),
@@ -905,7 +905,7 @@ async function toggleSold(product){
       product: { id: product.id, stock: newStock, prevStock: wasAgotado ? undefined : Number(product.stock) },
     };
     try {
-      const res = await fetch(`${WORKER_URL}/admin/save-product`, {
+      const res = await fetch(`${WORKER_URL}/guardar-producto`, {
         method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
       });
       if (res.status === 401){ handleAuthError(); return; }
@@ -919,7 +919,7 @@ async function deleteProduct(product, onDone){
   requireAdmin(async () => {
     if (!confirm(`¿Borrar "${product.name}" del catálogo? Esto no se puede deshacer.`)) return;
     try {
-      const res = await fetch(`${WORKER_URL}/admin/delete-product`, {
+      const res = await fetch(`${WORKER_URL}/borrar-producto`, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password: getAdminPassword(), id: product.id }),
       });
