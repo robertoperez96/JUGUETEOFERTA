@@ -56,17 +56,17 @@
   .site-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;height:78px;}
   .brand{display:flex;align-items:center;gap:9px;text-decoration:none;min-width:0;}
   .brand img{height:56px;width:56px;object-fit:contain;flex-shrink:0;filter:drop-shadow(0 3px 6px rgba(35,41,70,.18));}
-  .brand-word{font-family:var(--fuente-titulo);font-weight:700;font-size:clamp(14px,4.4vw,21px);color:var(--tinta);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .brand-word{font-family:var(--fuente-titulo);font-weight:700;font-size:clamp(12px,4vw,21px);color:var(--tinta);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .brand-word span{color:var(--rojo);}
-  .header-actions{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+  .header-actions{display:flex;align-items:center;gap:6px;flex-shrink:0;}
   .icon-btn{
     position:relative;background:var(--crema);border:2px solid var(--borde);
-    width:46px;height:46px;border-radius:999px;display:flex;align-items:center;justify-content:center;
-    font-size:20px;transition:transform .15s, border-color .15s;
+    width:40px;height:40px;border-radius:999px;display:flex;align-items:center;justify-content:center;
+    font-size:17px;transition:transform .15s, border-color .15s;flex-shrink:0;
   }
   .icon-btn:active{transform:scale(.94);}
   .icon-btn.whatsapp-header{background:var(--whatsapp);border-color:var(--whatsapp-oscuro);}
-  .icon-btn.whatsapp-header svg{width:24px;height:24px;}
+  .icon-btn.whatsapp-header svg{width:20px;height:20px;}
   .cart-count{
     position:absolute;top:-6px;right:-6px;background:var(--rojo);color:#fff;
     font-size:11px;font-weight:800;min-width:20px;height:20px;border-radius:999px;
@@ -164,23 +164,26 @@
     position:absolute;top:8px;left:8px;font-size:11px;font-weight:800;padding:4px 9px;border-radius:999px;
     color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.15);
   }
-  .badge.cat{background:var(--azul);}
-  .badge.pocas{background:var(--amarillo-oscuro);color:#3a2a00;}
   .badge.agotado-tag{
     position:absolute;inset:0;margin:auto;width:fit-content;height:fit-content;top:50%;left:50%;
     transform:translate(-50%,-50%);background:rgba(35,41,70,.88);color:#fff;font-size:13px;
     font-weight:800;padding:8px 16px;border-radius:999px;letter-spacing:.02em;
   }
   .fotos-count{position:absolute;bottom:8px;right:8px;background:rgba(35,41,70,.72);color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;}
-  .card-body{padding:12px 12px 14px;display:flex;flex-direction:column;gap:8px;flex:1;}
-  .card-name{font-family:var(--fuente-titulo);font-weight:600;font-size:15.5px;line-height:1.25;
-    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:38px;}
-  .card-price{font-family:var(--fuente-titulo);font-weight:700;font-size:20px;color:var(--rojo-oscuro);}
-  .card-stock{font-size:12px;font-weight:800;}
+  .card-body{padding:10px 12px 12px;display:flex;flex-direction:column;gap:4px;flex:1;}
+  .card-cat-pill{
+    align-self:flex-start;display:inline-flex;align-items:center;gap:4px;background:rgba(46,168,224,.12);
+    color:var(--azul-oscuro);font-size:10.5px;font-weight:800;padding:3px 8px;border-radius:999px;margin-bottom:2px;
+  }
+  .card-name{font-family:var(--fuente-titulo);font-weight:600;font-size:14.5px;line-height:1.22;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .card-price-row{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-top:2px;}
+  .card-price{font-family:var(--fuente-titulo);font-weight:700;font-size:18px;color:var(--rojo-oscuro);}
+  .card-stock{font-size:11px;font-weight:800;white-space:nowrap;}
   .card-stock.ok{color:var(--verde-oscuro);}
   .card-stock.pocas{color:var(--amarillo-oscuro);}
   .card-stock.no{color:var(--tinta-suave);}
-  .card-actions{display:flex;align-items:center;gap:8px;margin-top:auto;}
+  .card-actions{display:flex;align-items:center;gap:8px;margin-top:6px;}
   .qty-stepper{display:flex;align-items:center;border:2px solid var(--borde);border-radius:999px;overflow:hidden;}
   .qty-stepper button{background:var(--crema);border:none;width:30px;height:34px;font-size:16px;font-weight:800;color:var(--tinta);}
   .qty-stepper span{width:26px;text-align:center;font-weight:800;font-size:14px;}
@@ -265,6 +268,13 @@
     display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--tinta-suave);font-weight:800;font-size:22px;
   }
   .add-photo-btn small{font-size:10px;font-weight:700;}
+  .url-paste-row{display:flex;gap:8px;margin-top:10px;}
+  .url-paste-row input{
+    flex:1;padding:11px 14px;border-radius:12px;border:2px solid var(--borde);
+    font-family:inherit;font-size:13.5px;font-weight:700;color:var(--tinta);background:var(--blanco);
+  }
+  .url-paste-row input:focus{outline:none;border-color:var(--azul);}
+  .url-paste-row button{background:var(--azul);color:#fff;border:none;border-radius:12px;padding:0 16px;font-weight:800;font-size:13px;flex-shrink:0;}
 
   .cat-select-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
   .cat-pick{
@@ -294,13 +304,43 @@
   .cart-total-row{display:flex;justify-content:space-between;align-items:center;padding:16px 0 6px;font-family:var(--fuente-titulo);font-size:19px;font-weight:700;}
   .cart-empty{text-align:center;padding:30px 10px;color:var(--tinta-suave);font-weight:700;}
 
-  /* lightbox de fotos */
-  #lightbox{background:rgba(20,20,30,.94);align-items:center;}
-  #lightbox .lb-img-wrap{position:relative;width:100%;max-width:480px;}
-  #lightbox img{width:100%;border-radius:14px;max-height:70vh;object-fit:contain;background:#111;}
-  #lightbox .lb-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.16);color:#fff;border:none;width:38px;height:38px;border-radius:999px;font-size:18px;font-weight:800;}
-  #lightbox .lb-prev{left:-4px;} #lightbox .lb-next{right:-4px;}
-  #lightbox .lb-close{position:absolute;top:-44px;right:0;background:none;border:none;color:#fff;font-size:26px;}
+  /* corazón de favoritos sobre la tarjeta */
+  .card-heart{
+    position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:999px;
+    background:rgba(255,255,255,.88);border:none;font-size:16px;display:flex;align-items:center;
+    justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.15);
+  }
+  .card-heart:active{transform:scale(.9);}
+
+  /* ---------- vista rápida del producto (carrusel + info + acciones) ---------- */
+  .qv-sheet{padding-top:0;overflow:hidden;}
+  .qv-sheet .close-x{background:rgba(255,255,255,.9);}
+  .qv-carousel{
+    position:relative;width:calc(100% + 40px);margin:0 -20px 0;aspect-ratio:1/1;
+    background:linear-gradient(135deg,#fdf3d8,#fef8e8);overflow:hidden;
+  }
+  .qv-track{display:flex;height:100%;transition:transform .3s ease;touch-action:pan-y;}
+  .qv-slide{flex:0 0 100%;height:100%;display:flex;align-items:center;justify-content:center;}
+  .qv-slide img{width:100%;height:100%;object-fit:contain;}
+  .qv-slide .sin-foto{font-size:64px;opacity:.3;}
+  .qv-arrow{
+    position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.88);
+    border:none;width:38px;height:38px;border-radius:999px;font-size:20px;font-weight:800;
+    color:var(--tinta);box-shadow:0 4px 10px rgba(0,0,0,.18);
+  }
+  .qv-prev{left:10px;} .qv-next{right:10px;}
+  .qv-dots{position:absolute;bottom:10px;left:0;right:0;display:flex;justify-content:center;gap:6px;}
+  .qv-dots .dot{width:7px;height:7px;border-radius:999px;background:rgba(255,255,255,.7);border:1px solid rgba(35,41,70,.25);}
+  .qv-dots .dot.active{background:var(--rojo);border-color:var(--rojo);}
+  .qv-info{padding:16px 2px 0;}
+  .qv-cat-badge{position:static;display:inline-flex;}
+  .qv-secondary-row{display:flex;gap:10px;margin-top:12px;}
+  .qv-secondary-btn{
+    flex:1;background:var(--blanco);border:2px solid var(--borde);border-radius:999px;
+    padding:11px 10px;font-weight:800;font-size:13px;color:var(--tinta);
+    display:flex;align-items:center;justify-content:center;gap:6px;
+  }
+  .qv-secondary-btn.active{border-color:var(--rojo);color:var(--rojo-oscuro);background:rgba(244,68,46,.06);}
 
   /* toast */
   #toast{
@@ -326,6 +366,9 @@
       <a id="whatsappHeaderBtn" class="icon-btn whatsapp-header" href="#" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp">
         <svg viewBox="0 0 24 24" fill="#fff"><path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.35 5.08L2 22l5.05-1.32C8.5 21.5 10.2 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm5.2 13.9c-.24.66-1.38 1.26-1.9 1.32-.5.06-1.02.29-3.4-.72-2.87-1.22-4.72-4.14-4.87-4.33-.14-.19-1.16-1.55-1.16-2.96 0-1.4.74-2.09 1-2.38.26-.28.57-.35.76-.35h.55c.18 0 .42-.03.64.5.24.57.8 1.98.87 2.12.07.14.11.31.02.5-.09.18-.14.29-.27.45-.14.16-.29.35-.41.47-.14.14-.28.29-.12.57.16.28.71 1.18 1.53 1.92 1.05.95 1.94 1.25 2.21 1.39.28.14.44.12.6-.07.16-.19.68-.79.87-1.06.18-.28.36-.23.6-.14.24.09 1.55.74 1.82.87.27.14.45.2.51.32.07.12.07.68-.17 1.33z"/></svg>
       </a>
+      <button id="wishlistOpenBtn" class="icon-btn" aria-label="Ver favoritos">
+        🤍<span id="wishlistCount" class="cart-count" hidden>0</span>
+      </button>
       <button id="cartOpenBtn" class="icon-btn" aria-label="Ver carrito">
         🛒<span id="cartCount" class="cart-count" hidden>0</span>
       </button>
@@ -408,11 +451,15 @@
       <h2 id="productSheetTitle">Agregar producto</h2>
 
       <div class="field">
-        <label>Fotos (desde tu cámara o galería)</label>
+        <label>Fotos (puedes agregar varias, desde tu cámara o galería)</label>
         <div class="photo-picker" id="photoPicker">
           <button type="button" class="add-photo-btn" id="addPhotoBtn">📷<small>Agregar</small></button>
         </div>
-        <input type="file" id="photoInput" accept="image/*" capture="environment" multiple hidden>
+        <input type="file" id="photoInput" accept="image/*" multiple hidden>
+        <div class="url-paste-row">
+          <input type="text" id="photoUrlInput" placeholder="O pega aquí el link de una imagen…">
+          <button type="button" id="addPhotoUrlBtn">Agregar</button>
+        </div>
       </div>
 
       <div class="field">
@@ -465,13 +512,51 @@
   </div>
 </div>
 
-<!-- ============== overlay: galería de fotos ============== -->
-<div id="lightbox" class="overlay">
-  <div class="lb-img-wrap">
-    <button class="lb-close" data-close="lightbox">✕</button>
-    <img id="lightboxImg" src="" alt="">
-    <button class="lb-nav lb-prev" id="lbPrev">‹</button>
-    <button class="lb-nav lb-next" id="lbNext">›</button>
+<!-- ============== overlay: favoritos ============== -->
+<div id="wishlistOverlay" class="overlay">
+  <div class="sheet-wrap">
+    <div class="sheet" id="wishlistSheet">
+      <button class="close-x" data-close="wishlistOverlay">✕</button>
+      <h2>🤍 Tus favoritos</h2>
+      <div id="wishlistList" style="margin-top:14px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============== overlay: vista rápida del producto ============== -->
+<div id="productView" class="overlay">
+  <div class="sheet-wrap">
+    <div class="sheet qv-sheet" id="qvSheet">
+      <button class="close-x" data-close="productView">✕</button>
+
+      <div class="qv-carousel" id="qvCarousel">
+        <div class="qv-track" id="qvTrack"></div>
+        <button class="qv-arrow qv-prev" id="qvPrev">‹</button>
+        <button class="qv-arrow qv-next" id="qvNext">›</button>
+        <div class="qv-dots" id="qvDots"></div>
+      </div>
+
+      <div class="qv-info">
+        <span class="badge cat qv-cat-badge" id="qvCat"></span>
+        <h2 id="qvName" style="margin-top:8px;"></h2>
+        <div class="card-price" id="qvPrice" style="font-size:24px;"></div>
+        <div class="card-stock" id="qvStock"></div>
+      </div>
+
+      <div class="form-actions" style="margin-top:14px;">
+        <div class="qty-stepper" id="qvStepperWrap" style="flex:0 0 auto;">
+          <button type="button" id="qvMinus">−</button>
+          <span id="qvQty">1</span>
+          <button type="button" id="qvPlus">+</button>
+        </div>
+        <button class="btn-add" id="qvAddBtn" style="flex:1;height:44px;font-size:14px;">🛒 Agregar al carrito</button>
+      </div>
+
+      <div class="qv-secondary-row">
+        <button class="qv-secondary-btn" id="qvWishlistBtn"><span id="qvWishlistIcon">🤍</span> <span id="qvWishlistLabel">Favoritos</span></button>
+        <button class="qv-secondary-btn" id="qvShareBtn">🔗 Compartir</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -495,16 +580,27 @@ const CATEGORIES = [
 ];
 const catInfo = (id) => CATEGORIES.find(c => c.id === id) || CATEGORIES[CATEGORIES.length-1];
 
+/* texto de existencias, con gramática correcta según la cantidad */
+function stockLabel(stock){
+  if (stock <= 0) return { text: "Sin existencias", cls: "no" };
+  if (stock === 1) return { text: "¡Última pieza!", cls: "pocas" };
+  if (stock === 2) return { text: "¡Últimas 2 piezas!", cls: "pocas" };
+  return { text: "Disponible", cls: "ok" };
+}
+
 /* ===================================================================== */
 
 let products = [];
 let cart = {};              // { id: qty }
 let activeCat = "todos";
 let searchText = "";
-let pendingImages = [];     // fotos (dataURL) del producto que se está agregando/editando
+let pendingImages = [];     // fotos (dataURL o links) del producto que se está agregando/editando
 let editingProduct = null;  // producto que se está editando (null = agregar nuevo)
-let lightboxImages = [];
-let lightboxIndex = 0;
+let currentQvProduct = null; // producto abierto en la vista rápida
+let qvImages = [];
+let qvIndex = 0;
+let qvQty = 1;
+let deepLinkHandled = false;
 
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => Array.from(document.querySelectorAll(sel));
@@ -513,6 +609,49 @@ const money = (n) => "$" + Math.round(Number(n)||0).toLocaleString("es-MX");
 /* ---------------- cargar carrito guardado ---------------- */
 try { cart = JSON.parse(localStorage.getItem("jomx_cart") || "{}"); } catch { cart = {}; }
 function saveCart(){ localStorage.setItem("jomx_cart", JSON.stringify(cart)); }
+
+/* ---------------- favoritos (lista de deseos), guardados en este celular ---------------- */
+let wishlist = [];
+try { wishlist = JSON.parse(localStorage.getItem("jomx_wishlist") || "[]"); } catch { wishlist = []; }
+function saveWishlist(){ localStorage.setItem("jomx_wishlist", JSON.stringify(wishlist)); }
+function isWishlisted(id){ return wishlist.includes(id); }
+function toggleWishlist(id){
+  wishlist = isWishlisted(id) ? wishlist.filter(x => x !== id) : [...wishlist, id];
+  saveWishlist();
+  updateWishlistUI();
+}
+function updateWishlistUI(){
+  $("#wishlistCount").hidden = wishlist.length === 0;
+  $("#wishlistCount").textContent = wishlist.length;
+  $$(".card-heart").forEach(btn => { btn.textContent = isWishlisted(btn.dataset.id) ? "❤️" : "🤍"; });
+  if (currentQvProduct){
+    const active = isWishlisted(currentQvProduct.id);
+    $("#qvWishlistIcon").textContent = active ? "❤️" : "🤍";
+    $("#qvWishlistLabel").textContent = active ? "En favoritos" : "Favoritos";
+    $("#qvWishlistBtn").classList.toggle("active", active);
+  }
+  renderWishlistList();
+}
+function renderWishlistList(){
+  const list = $("#wishlistList");
+  const items = wishlist.map(id => products.find(p => p.id === id)).filter(Boolean);
+  if (!items.length){
+    list.innerHTML = `<div class="cart-empty">Aún no guardas favoritos.<br>Toca el corazón 🤍 en un juguete para guardarlo aquí.</div>`;
+    return;
+  }
+  list.innerHTML = items.map(p => `
+    <div class="cart-item">
+      <img src="${(p.images&&p.images[0])||''}" alt="">
+      <div class="grow">
+        <div class="n">${p.name}</div>
+        <div class="p">${money(p.price)}</div>
+      </div>
+      <button class="rm" data-id="${p.id}">✕</button>
+    </div>
+  `).join("");
+  list.querySelectorAll(".rm").forEach(btn => btn.addEventListener("click", () => toggleWishlist(btn.dataset.id)));
+}
+$("#wishlistOpenBtn").addEventListener("click", () => openOverlay("wishlistOverlay"));
 
 /* ---------------- admin: sesión guardada en este celular ---------------- */
 function getAdminPassword(){ return localStorage.getItem("jomx_admin_pw") || ""; }
@@ -535,7 +674,10 @@ function toast(msg){
 
 /* ---------------- overlays genéricos ---------------- */
 function openOverlay(id){ $("#"+id).classList.add("open"); }
-function closeOverlay(id){ $("#"+id).classList.remove("open"); }
+function closeOverlay(id){
+  $("#"+id).classList.remove("open");
+  if (id === "productView" && typeof closeQuickView === "function") closeQuickView();
+}
 $$("[data-close]").forEach(btn => btn.addEventListener("click", () => closeOverlay(btn.dataset.close)));
 $$(".overlay").forEach(ov => ov.addEventListener("click", (e) => { if (e.target === ov) closeOverlay(ov.id); }));
 
@@ -553,6 +695,17 @@ async function loadProducts(){
   }
   renderCategoryNav();
   render();
+
+  // si el link traía "?producto=ID" (por ejemplo compartido por WhatsApp),
+  // abre esa vista rápida automáticamente, solo la primera vez que carga
+  if (!deepLinkHandled){
+    deepLinkHandled = true;
+    const sharedId = new URLSearchParams(location.search).get("producto");
+    if (sharedId){
+      const shared = products.find(p => p.id === sharedId);
+      if (shared) openQuickView(shared);
+    }
+  }
 }
 
 /* =====================================================================
@@ -602,20 +755,23 @@ function renderCard(p){
   const img = (p.images && p.images[0]) || "";
   const cat = catInfo(p.category);
 
+  const stockInfo = stockLabel(stock);
   const el = document.createElement("div");
   el.className = "card" + (agotado ? " agotado" : "");
   el.innerHTML = `
     <div class="card-art" data-id="${p.id}">
-      <span class="badge cat">${cat.emoji} ${cat.label}</span>
+      <button class="card-heart" data-id="${p.id}" aria-label="Favoritos">${isWishlisted(p.id) ? "❤️" : "🤍"}</button>
       ${img ? `<img src="${img}" alt="${p.name}">` : `<span class="sin-foto">🧸</span>`}
       ${p.images && p.images.length > 1 ? `<span class="fotos-count">📷 ${p.images.length}</span>` : ""}
-      ${!agotado && stock <= 2 ? `<span class="badge pocas" style="left:auto;right:8px;top:auto;bottom:8px;">¡Últimas ${stock}!</span>` : ""}
       ${agotado ? `<span class="badge agotado-tag">Agotado</span>` : ""}
     </div>
     <div class="card-body">
+      <span class="card-cat-pill">${cat.emoji} ${cat.label}</span>
       <div class="card-name">${p.name}</div>
-      <div class="card-price">${money(p.price)}</div>
-      <div class="card-stock ${agotado ? 'no' : (stock<=2?'pocas':'ok')}">${agotado ? "Sin existencias" : (stock<=2 ? `Quedan ${stock}` : "Disponible")}</div>
+      <div class="card-price-row">
+        <div class="card-price">${money(p.price)}</div>
+        <div class="card-stock ${stockInfo.cls}">${stockInfo.text}</div>
+      </div>
       <div class="card-actions">
         <div class="qty-stepper">
           <button class="qm" data-id="${p.id}">−</button>
@@ -632,7 +788,8 @@ function renderCard(p){
     </div>
   `;
 
-  el.querySelector(".card-art").addEventListener("click", () => openLightbox(p));
+  el.querySelector(".card-art").addEventListener("click", () => openQuickView(p));
+  el.querySelector(".card-heart").addEventListener("click", (e) => { e.stopPropagation(); toggleWishlist(p.id); });
   el.querySelector(".qm").addEventListener("click", () => changeQtyDraft(p.id, -1));
   el.querySelector(".qp").addEventListener("click", () => changeQtyDraft(p.id, 1, stock));
   el.querySelector(".btn-add").addEventListener("click", () => addToCart(p.id, stock));
@@ -736,22 +893,123 @@ $("#searchInput").addEventListener("input", (e) => {
 });
 
 /* =====================================================================
-   GALERÍA DE FOTOS (lightbox)
+   VISTA RÁPIDA DEL PRODUCTO (carrusel de fotos + carrito + favoritos + compartir)
    ===================================================================== */
-function openLightbox(product){
-  lightboxImages = (product.images && product.images.length) ? product.images : [];
-  if (!lightboxImages.length) return;
-  lightboxIndex = 0;
-  updateLightboxImg();
-  openOverlay("lightbox");
+function openQuickView(product){
+  currentQvProduct = product;
+  qvImages = (product.images && product.images.length) ? product.images : [];
+  qvIndex = 0;
+  qvQty = 1;
+  renderQvCarousel();
+  updateQvInfo();
+  openOverlay("productView");
+  // deja el link del producto en la URL, así "Compartir" o recargar la página vuelve a abrirlo
+  const url = new URL(location.href);
+  url.searchParams.set("producto", product.id);
+  history.replaceState(null, "", url);
 }
-function updateLightboxImg(){
-  $("#lightboxImg").src = lightboxImages[lightboxIndex];
-  $("#lbPrev").hidden = lightboxImages.length < 2;
-  $("#lbNext").hidden = lightboxImages.length < 2;
+
+function closeQuickView(){
+  currentQvProduct = null;
+  const url = new URL(location.href);
+  url.searchParams.delete("producto");
+  history.replaceState(null, "", url);
 }
-$("#lbPrev").addEventListener("click", () => { lightboxIndex = (lightboxIndex - 1 + lightboxImages.length) % lightboxImages.length; updateLightboxImg(); });
-$("#lbNext").addEventListener("click", () => { lightboxIndex = (lightboxIndex + 1) % lightboxImages.length; updateLightboxImg(); });
+
+function renderQvCarousel(){
+  const track = $("#qvTrack");
+  track.style.transform = "translateX(0)";
+  if (!qvImages.length){
+    track.innerHTML = `<div class="qv-slide"><span class="sin-foto">🧸</span></div>`;
+  } else {
+    track.innerHTML = qvImages.map(src => `<div class="qv-slide"><img src="${src}" alt=""></div>`).join("");
+  }
+  const dots = $("#qvDots");
+  dots.innerHTML = qvImages.length > 1
+    ? qvImages.map((_,i) => `<span class="dot ${i===0?'active':''}" data-i="${i}"></span>`).join("")
+    : "";
+  dots.querySelectorAll(".dot").forEach(d => d.addEventListener("click", () => { qvIndex = Number(d.dataset.i); updateQvSlide(); }));
+  $("#qvPrev").hidden = qvImages.length < 2;
+  $("#qvNext").hidden = qvImages.length < 2;
+}
+function updateQvSlide(){
+  $("#qvTrack").style.transform = `translateX(-${qvIndex*100}%)`;
+  $$("#qvDots .dot").forEach((d,i) => d.classList.toggle("active", i === qvIndex));
+}
+$("#qvPrev").addEventListener("click", () => { qvIndex = (qvIndex - 1 + qvImages.length) % qvImages.length; updateQvSlide(); });
+$("#qvNext").addEventListener("click", () => { qvIndex = (qvIndex + 1) % qvImages.length; updateQvSlide(); });
+
+/* deslizar con el dedo para cambiar de foto */
+(function(){
+  const track = $("#qvTrack");
+  let startX = 0, deltaX = 0, dragging = false;
+  track.addEventListener("touchstart", (e) => {
+    if (qvImages.length < 2) return;
+    dragging = true; startX = e.touches[0].clientX; track.style.transition = "none";
+  }, { passive:true });
+  track.addEventListener("touchmove", (e) => {
+    if (!dragging) return;
+    deltaX = e.touches[0].clientX - startX;
+    track.style.transform = `translateX(calc(-${qvIndex*100}% + ${deltaX}px))`;
+  }, { passive:true });
+  track.addEventListener("touchend", () => {
+    if (!dragging) return;
+    dragging = false; track.style.transition = "";
+    if (deltaX < -50 && qvIndex < qvImages.length-1) qvIndex++;
+    else if (deltaX > 50 && qvIndex > 0) qvIndex--;
+    deltaX = 0;
+    updateQvSlide();
+  });
+})();
+
+function updateQvInfo(){
+  const p = currentQvProduct;
+  const stock = Number(p.stock)||0;
+  const agotado = stock <= 0;
+  const cat = catInfo(p.category);
+  const stockInfo = stockLabel(stock);
+  $("#qvCat").textContent = `${cat.emoji} ${cat.label}`;
+  $("#qvName").textContent = p.name;
+  $("#qvPrice").textContent = money(p.price);
+  $("#qvStock").textContent = stockInfo.text;
+  $("#qvStock").className = "card-stock " + stockInfo.cls;
+  $("#qvQty").textContent = qvQty;
+  $("#qvAddBtn").disabled = agotado;
+  $("#qvAddBtn").textContent = agotado ? "Agotado" : "🛒 Agregar al carrito";
+  updateWishlistUI();
+}
+$("#qvMinus").addEventListener("click", () => { if (qvQty > 1) qvQty--; $("#qvQty").textContent = qvQty; });
+$("#qvPlus").addEventListener("click", () => {
+  const stock = Number(currentQvProduct?.stock)||0;
+  if (!stock || qvQty < stock) qvQty++;
+  $("#qvQty").textContent = qvQty;
+});
+$("#qvAddBtn").addEventListener("click", () => {
+  if (!currentQvProduct) return;
+  const stock = Number(currentQvProduct.stock)||0;
+  const nextQty = (cart[currentQvProduct.id]||0) + qvQty;
+  cart[currentQvProduct.id] = stock ? Math.min(nextQty, stock) : nextQty;
+  saveCart();
+  updateCartUI();
+  toast("Agregado al carrito 🛒");
+  closeOverlay("productView");
+});
+$("#qvWishlistBtn").addEventListener("click", () => { if (currentQvProduct) toggleWishlist(currentQvProduct.id); });
+$("#qvShareBtn").addEventListener("click", () => shareProduct(currentQvProduct));
+
+function shareProduct(product){
+  if (!product) return;
+  const url = new URL(location.href);
+  url.searchParams.set("producto", product.id);
+  const shareData = { title: product.name, text: `Mira este juguete: ${product.name} — ${money(product.price)}`, url: url.toString() };
+  if (navigator.share){
+    navigator.share(shareData).catch(() => {});
+  } else if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url.toString()).then(() => toast("Enlace copiado 📋")).catch(() => toast(url.toString()));
+  } else {
+    toast(url.toString());
+  }
+}
 
 /* =====================================================================
    ADMIN — login con contraseña compartida
@@ -841,6 +1099,21 @@ $("#photoInput").addEventListener("change", async (e) => {
   e.target.value = "";
 });
 
+/* agregar una foto pegando un link en vez de subir el archivo */
+$("#addPhotoUrlBtn").addEventListener("click", () => {
+  const input = $("#photoUrlInput");
+  const val = input.value.trim();
+  if (!val) return;
+  if (!/^https?:\/\/.+/i.test(val)){
+    toast("Pega un link que empiece con http:// o https://");
+    return;
+  }
+  pendingImages.push(val);
+  input.value = "";
+  renderPhotoPicker();
+});
+$("#photoUrlInput").addEventListener("keydown", (e) => { if (e.key === "Enter"){ e.preventDefault(); $("#addPhotoUrlBtn").click(); } });
+
 /* comprime la foto en el navegador antes de guardarla, para que el
    catálogo cargue rápido en el celular de los clientes */
 function compressImage(file){
@@ -874,6 +1147,7 @@ function openProductForm(product){
   $("#fieldPrice").value = product ? product.price : "";
   $("#fieldStock").value = product ? product.stock : 1;
   $("#productMsg").textContent = "";
+  $("#photoUrlInput").value = "";
   $("#productDeleteBtn").hidden = !product;
   renderCatPickGrid(product ? product.category : CATEGORIES[0].id);
   renderPhotoPicker();
@@ -960,6 +1234,7 @@ async function deleteProduct(product, onDone){
    ===================================================================== */
 setAdminMode(isAdmin());
 $("#adminLoginTrigger").hidden = isAdmin();
+updateWishlistUI();
 loadProducts();
 </script>
 </body>
