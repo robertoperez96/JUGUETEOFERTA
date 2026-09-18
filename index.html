@@ -263,6 +263,19 @@
   .photo-thumb{position:relative;width:78px;height:78px;border-radius:12px;overflow:hidden;border:2px solid var(--borde);}
   .photo-thumb img{width:100%;height:100%;object-fit:cover;}
   .photo-thumb .rm{position:absolute;top:2px;right:2px;background:rgba(35,41,70,.75);color:#fff;border:none;width:20px;height:20px;border-radius:999px;font-size:11px;font-weight:800;}
+  .photo-thumb .ed{position:absolute;top:2px;left:2px;background:rgba(46,168,224,.92);color:#fff;border:none;width:20px;height:20px;border-radius:999px;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;}
+
+  /* recortar foto */
+  .crop-hint{font-size:12.5px;font-weight:700;color:var(--tinta-suave);margin-top:6px;}
+  .crop-outer{display:flex;justify-content:center;align-items:center;background:#15182b;border-radius:14px;padding:10px;margin-top:12px;max-height:58vh;overflow:hidden;touch-action:none;}
+  .crop-stage{position:relative;display:inline-block;line-height:0;}
+  .crop-stage img{display:block;max-width:100%;max-height:52vh;-webkit-user-drag:none;user-select:none;}
+  .crop-box{position:absolute;border:2px solid #fff;box-shadow:0 0 0 9999px rgba(0,0,0,.55);cursor:move;touch-action:none;}
+  .crop-handle{position:absolute;width:22px;height:22px;background:#fff;border:3px solid var(--rojo);border-radius:999px;touch-action:none;}
+  .crop-handle.ch-tl{top:-11px;left:-11px;cursor:nwse-resize;}
+  .crop-handle.ch-tr{top:-11px;right:-11px;cursor:nesw-resize;}
+  .crop-handle.ch-bl{bottom:-11px;left:-11px;cursor:nesw-resize;}
+  .crop-handle.ch-br{bottom:-11px;right:-11px;cursor:nwse-resize;}
   .add-photo-btn{
     width:78px;height:78px;border-radius:12px;border:2px dashed var(--borde-fuerte);background:var(--blanco);
     display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--tinta-suave);font-weight:800;font-size:22px;
@@ -494,6 +507,33 @@
         <button class="btn btn-primary" id="productSaveBtn">Guardar</button>
       </div>
       <button class="btn btn-danger-outline" id="productDeleteBtn" style="width:100%;margin-top:10px;" hidden>🗑️ Borrar este producto</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============== overlay: recortar foto ============== -->
+<div id="cropOverlay" class="overlay">
+  <div class="sheet-wrap">
+    <div class="sheet crop-sheet" id="cropSheet">
+      <button class="close-x" data-close="cropOverlay">✕</button>
+      <h2>✂️ Recortar foto</h2>
+      <div class="crop-hint">Arrastra las esquinas para ajustar el recorte, y el centro para moverlo.</div>
+      <div class="crop-outer" id="cropOuter">
+        <div class="crop-stage" id="cropStage">
+          <img id="cropImg" alt="">
+          <div class="crop-box" id="cropBox">
+            <div class="crop-handle ch-tl" data-h="tl"></div>
+            <div class="crop-handle ch-tr" data-h="tr"></div>
+            <div class="crop-handle ch-bl" data-h="bl"></div>
+            <div class="crop-handle ch-br" data-h="br"></div>
+          </div>
+        </div>
+      </div>
+      <div class="form-msg" id="cropMsg"></div>
+      <div class="form-actions">
+        <button class="btn btn-secondary" id="cropResetBtn" type="button">↺ Restablecer</button>
+        <button class="btn btn-primary" id="cropApplyBtn" type="button">✅ Recortar y usar</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1091,11 +1131,138 @@ function renderPhotoPicker(){
   pendingImages.forEach((src, i) => {
     const thumb = document.createElement("div");
     thumb.className = "photo-thumb";
-    thumb.innerHTML = `<img src="${src}"><button type="button" class="rm">✕</button>`;
+    thumb.innerHTML = `<img src="${src}"><button type="button" class="ed" title="Recortar">✏️</button><button type="button" class="rm">✕</button>`;
+    thumb.querySelector(".ed").addEventListener("click", () => openCropper(i));
     thumb.querySelector(".rm").addEventListener("click", () => { pendingImages.splice(i,1); renderPhotoPicker(); });
     wrap.insertBefore(thumb, $("#addPhotoBtn"));
   });
 }
+
+/* =====================================================================
+   RECORTAR FOTO — para poder cortar screenshots u otras fotos que ya
+   se agregaron, directo en el sitio (funciona igual con dedo en el
+   celular que con mouse en la computadora, usando Pointer Events).
+   ===================================================================== */
+let cropTargetIndex = null;
+let cropBoxRect = { x: 0, y: 0, w: 0, h: 0 }; // en píxeles, relativo a la imagen renderizada
+
+function openCropper(index){
+  cropTargetIndex = index;
+  const src = pendingImages[index];
+  const img = $("#cropImg");
+  $("#cropMsg").textContent = "";
+  img.onload = () => resetCropBox();
+  img.onerror = () => { $("#cropMsg").textContent = "No se pudo cargar esta foto para recortarla."; };
+  img.src = src;
+  openOverlay("cropOverlay");
+}
+
+function resetCropBox(){
+  const img = $("#cropImg");
+  const w = img.clientWidth, h = img.clientHeight;
+  if (!w || !h) return;
+  cropBoxRect = { x: 0, y: 0, w, h };
+  paintCropBox();
+}
+
+function paintCropBox(){
+  const box = $("#cropBox");
+  box.style.left = cropBoxRect.x + "px";
+  box.style.top = cropBoxRect.y + "px";
+  box.style.width = cropBoxRect.w + "px";
+  box.style.height = cropBoxRect.h + "px";
+}
+
+// arrastrar (mover) o redimensionar (esquinas) el recuadro de recorte
+(function setupCropDragging(){
+  const stage = $("#cropStage");
+  const box = $("#cropBox");
+  const MIN = 30;
+  let mode = null; // "move" | "tl" | "tr" | "bl" | "br"
+  let start = null;
+
+  function stageSize(){
+    const img = $("#cropImg");
+    return { w: img.clientWidth, h: img.clientHeight };
+  }
+
+  function onDown(mode_, e){
+    mode = mode_;
+    const p = e.touches ? e.touches[0] : e;
+    start = { px: p.clientX, py: p.clientY, box: { ...cropBoxRect } };
+    e.preventDefault();
+  }
+
+  function onMove(e){
+    if (!mode) return;
+    const p = e.touches ? e.touches[0] : e;
+    const dx = p.clientX - start.px;
+    const dy = p.clientY - start.py;
+    const { w: sw, h: sh } = stageSize();
+    let { x, y, w, h } = start.box;
+
+    if (mode === "move"){
+      x = clamp(start.box.x + dx, 0, sw - start.box.w);
+      y = clamp(start.box.y + dy, 0, sh - start.box.h);
+      w = start.box.w; h = start.box.h;
+    } else {
+      let x2 = start.box.x + start.box.w, y2 = start.box.y + start.box.h;
+      if (mode === "tl"){ x = clamp(start.box.x + dx, 0, x2 - MIN); y = clamp(start.box.y + dy, 0, y2 - MIN); w = x2 - x; h = y2 - y; }
+      if (mode === "tr"){ y = clamp(start.box.y + dy, 0, y2 - MIN); w = clamp(start.box.w + dx, MIN, sw - x); h = y2 - y; }
+      if (mode === "bl"){ x = clamp(start.box.x + dx, 0, x2 - MIN); w = x2 - x; h = clamp(start.box.h + dy, MIN, sh - y); }
+      if (mode === "br"){ w = clamp(start.box.w + dx, MIN, sw - x); h = clamp(start.box.h + dy, MIN, sh - y); }
+    }
+    cropBoxRect = { x, y, w, h };
+    paintCropBox();
+    e.preventDefault();
+  }
+
+  function onUp(){ mode = null; start = null; }
+
+  function clamp(v, min, max){ if (max < min) max = min; return Math.min(max, Math.max(min, v)); }
+
+  box.addEventListener("mousedown", (e) => { if (e.target === box) onDown("move", e); });
+  box.addEventListener("touchstart", (e) => { if (e.target === box) onDown("move", e); }, { passive: false });
+  box.querySelectorAll(".crop-handle").forEach(h => {
+    h.addEventListener("mousedown", (e) => onDown(h.dataset.h, e));
+    h.addEventListener("touchstart", (e) => onDown(h.dataset.h, e), { passive: false });
+  });
+  window.addEventListener("mousemove", onMove);
+  window.addEventListener("touchmove", onMove, { passive: false });
+  window.addEventListener("mouseup", onUp);
+  window.addEventListener("touchend", onUp);
+})();
+
+$("#cropResetBtn").addEventListener("click", () => resetCropBox());
+
+$("#cropApplyBtn").addEventListener("click", () => {
+  if (cropTargetIndex === null) { closeOverlay("cropOverlay"); return; }
+  const img = $("#cropImg");
+  if (!img.naturalWidth || !cropBoxRect.w || !cropBoxRect.h){
+    $("#cropMsg").textContent = "No se pudo cargar esta foto para recortarla.";
+    return;
+  }
+  const scale = img.naturalWidth / img.clientWidth;
+  const sx = cropBoxRect.x * scale;
+  const sy = cropBoxRect.y * scale;
+  const sw = cropBoxRect.w * scale;
+  const sh = cropBoxRect.h * scale;
+  try {
+    const maxW = 900;
+    const outScale = Math.min(1, maxW / sw);
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(sw * outScale);
+    canvas.height = Math.round(sh * outScale);
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.82);
+    pendingImages[cropTargetIndex] = dataUrl;
+    renderPhotoPicker();
+    closeOverlay("cropOverlay");
+  } catch (err) {
+    $("#cropMsg").textContent = "Esta foto viene de un link externo y no se puede recortar aquí. Sube la foto directamente (cámara o galería) para poder recortarla.";
+  }
+});
 
 $("#addPhotoBtn").addEventListener("click", () => $("#photoInput").click());
 $("#photoInput").addEventListener("change", async (e) => {
