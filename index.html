@@ -158,7 +158,7 @@
     aspect-ratio:1/1;background:linear-gradient(135deg,#fdf3d8,#fef8e8);position:relative;overflow:hidden;
     display:flex;align-items:center;justify-content:center;cursor:pointer;
   }
-  .card-art img{width:100%;height:100%;object-fit:cover;}
+  .card-art img{width:100%;height:100%;object-fit:contain;padding:10px;box-sizing:border-box;}
   .card-art .sin-foto{font-size:44px;opacity:.35;}
   .badge{
     position:absolute;top:8px;left:8px;font-size:11px;font-weight:800;padding:4px 9px;border-radius:999px;
@@ -170,6 +170,17 @@
     font-weight:800;padding:8px 16px;border-radius:999px;letter-spacing:.02em;
   }
   .fotos-count{position:absolute;bottom:8px;right:8px;background:rgba(35,41,70,.72);color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;}
+  .card-nav-arrow{
+    position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.88);border:none;
+    width:28px;height:28px;border-radius:999px;font-size:16px;font-weight:800;color:var(--tinta);
+    display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.18);
+    opacity:0;transition:opacity .15s;z-index:2;
+  }
+  .card-art:hover .card-nav-arrow{opacity:1;}
+  @media (hover:none){ .card-nav-arrow{opacity:1;} }
+  .card-nav-arrow:active{transform:translateY(-50%) scale(.9);}
+  .card-nav-arrow.prev{left:6px;}
+  .card-nav-arrow.next{right:6px;}
   .card-body{padding:10px 12px 12px;display:flex;flex-direction:column;gap:4px;flex:1;}
   .card-cat-pill{
     align-self:flex-start;display:inline-flex;align-items:center;gap:4px;background:rgba(46,168,224,.12);
@@ -333,7 +344,9 @@
     position:relative;width:calc(100% + 40px);margin:0 -20px 0;aspect-ratio:1/1;max-height:46vh;
     background:linear-gradient(135deg,#fdf3d8,#fef8e8);overflow:hidden;border-radius:22px 22px 0 0;
   }
-  .qv-track{display:flex;height:100%;transition:transform .3s ease;touch-action:pan-y;}
+  .qv-track{display:flex;height:100%;transition:transform .3s ease;touch-action:pan-y;cursor:grab;}
+  .qv-track:active{cursor:grabbing;}
+  .qv-track img{-webkit-user-drag:none;user-select:none;}
   .qv-slide{flex:0 0 100%;height:100%;display:flex;align-items:center;justify-content:center;}
   .qv-slide img{width:100%;height:100%;object-fit:contain;}
   .qv-slide .sin-foto{font-size:64px;opacity:.3;}
@@ -369,6 +382,57 @@
 
   footer{padding:34px 0 20px;text-align:center;color:var(--tinta-suave);font-size:13px;}
   footer .salir-admin{display:inline-block;margin-top:10px;font-size:12px;text-decoration:underline;color:var(--tinta-suave);background:none;border:none;}
+
+  /* ---------- selector de vista (1 columna / 2 columnas) — solo celular ---------- */
+  .view-toggle{display:none;}
+  .view-btn{
+    width:38px;height:34px;border-radius:10px;border:2px solid var(--borde);background:var(--blanco);
+    color:var(--tinta-suave);display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .view-btn.active{border-color:var(--azul);color:var(--azul-oscuro);background:rgba(46,168,224,.12);}
+  .view-btn .vi{display:flex;gap:3px;width:18px;height:13px;}
+  .view-btn .vi i{flex:1;display:block;background:currentColor;border-radius:2.5px;}
+
+  /* =====================================================================
+     AJUSTES ESPECÍFICOS PARA CELULAR — encabezado más compacto para que
+     el logo y "Juguete Oferta MX" siempre quepan completos, categorías
+     más grandes y visibles, y selector de vista de 1 o 2 columnas.
+     ===================================================================== */
+  @media (max-width:480px){
+    .wrap.site-bar{padding:0 12px;gap:8px;}
+    .brand{gap:6px;}
+    .brand img{height:44px;width:44px;}
+    .brand-word{font-size:clamp(12px,4.2vw,15px);}
+    .header-actions{gap:5px;}
+    .icon-btn{width:33px;height:33px;font-size:14.5px;}
+    .icon-btn.whatsapp-header svg{width:16px;height:16px;}
+    .cart-count{min-width:16px;height:16px;font-size:9px;top:-4px;right:-4px;border-width:1.5px;}
+  }
+  @media (max-width:640px){
+    .cat-nav{padding:14px 0;box-shadow:0 3px 10px -6px rgba(35,41,70,.2);}
+    .cat-nav-inner{gap:10px;}
+    .cat-tab{padding:12px 18px;font-size:14.5px;border-width:2px;}
+    .cat-tab span{font-size:16px;}
+
+    .view-toggle{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:4px 2px 14px;}
+    .view-toggle-label{font-size:12.5px;font-weight:800;color:var(--tinta-suave);margin-right:2px;}
+
+    .grid.view-1col{grid-template-columns:1fr;gap:16px;}
+    .grid.view-2col{grid-template-columns:1fr 1fr;gap:10px;}
+
+    .grid.view-2col .card-art img{padding:6px;}
+    .grid.view-2col .card-body{padding:8px 9px 10px;gap:3px;}
+    .grid.view-2col .card-cat-pill{font-size:9.5px;padding:2px 7px;}
+    .grid.view-2col .card-name{font-size:12.5px;}
+    .grid.view-2col .card-price{font-size:15px;}
+    .grid.view-2col .card-stock{font-size:9.5px;}
+    .grid.view-2col .card-actions{gap:5px;margin-top:4px;flex-wrap:wrap;}
+    .grid.view-2col .qty-stepper button{width:22px;height:28px;font-size:13px;}
+    .grid.view-2col .qty-stepper span{width:18px;font-size:12px;}
+    .grid.view-2col .btn-add{height:28px;font-size:10.5px;gap:3px;flex-basis:100%;}
+    .grid.view-2col .admin-bar{padding:0 9px 9px;gap:4px;flex-wrap:wrap;}
+    .grid.view-2col .admin-bar button{font-size:9.5px;padding:6px 3px;}
+  }
 </style>
 </head>
 <body>
@@ -415,6 +479,15 @@
 </nav>
 
 <main class="wrap">
+  <div class="view-toggle" id="viewToggle">
+    <span class="view-toggle-label">Ver:</span>
+    <button type="button" id="view1Btn" class="view-btn" aria-label="Vista de 1 columna">
+      <span class="vi"><i></i></span>
+    </button>
+    <button type="button" id="view2Btn" class="view-btn" aria-label="Vista de 2 columnas">
+      <span class="vi"><i></i><i></i></span>
+    </button>
+  </div>
   <div id="grid" class="grid"></div>
   <div id="emptyState" class="empty-state" hidden>
     <span class="emoji">🧸</span>
@@ -657,6 +730,22 @@ const money = (n) => "$" + Math.round(Number(n)||0).toLocaleString("es-MX");
 try { cart = JSON.parse(localStorage.getItem("jomx_cart") || "{}"); } catch { cart = {}; }
 function saveCart(){ localStorage.setItem("jomx_cart", JSON.stringify(cart)); }
 
+/* ---------------- vista de catálogo en celular: 1 columna o 2 columnas ---------------- */
+function applyGridView(mode){
+  const grid = $("#grid");
+  if (!grid) return;
+  grid.classList.remove("view-1col", "view-2col");
+  grid.classList.add(mode === "1" ? "view-1col" : "view-2col");
+  $("#view1Btn").classList.toggle("active", mode === "1");
+  $("#view2Btn").classList.toggle("active", mode === "2");
+  try { localStorage.setItem("jomx_grid_view", mode); } catch {}
+}
+$("#view1Btn").addEventListener("click", () => applyGridView("1"));
+$("#view2Btn").addEventListener("click", () => applyGridView("2"));
+let savedGridView = "2";
+try { savedGridView = localStorage.getItem("jomx_grid_view") || "2"; } catch {}
+applyGridView(savedGridView);
+
 /* ---------------- favoritos (lista de deseos), guardados en este celular ---------------- */
 let wishlist = [];
 try { wishlist = JSON.parse(localStorage.getItem("jomx_wishlist") || "[]"); } catch { wishlist = []; }
@@ -809,11 +898,16 @@ function renderCard(p){
   const stockInfo = stockLabel(stock);
   const el = document.createElement("div");
   el.className = "card" + (agotado ? " agotado" : "");
+  const hasMultiplePhotos = p.images && p.images.length > 1;
   el.innerHTML = `
     <div class="card-art" data-id="${p.id}">
       <button class="card-heart${isWishlisted(p.id) ? ' active' : ''}" data-id="${p.id}" aria-label="Favoritos">${isWishlisted(p.id) ? "❤️" : "🤍"}</button>
       ${img ? `<img src="${img}" alt="${p.name}">` : `<span class="sin-foto">🧸</span>`}
-      ${p.images && p.images.length > 1 ? `<span class="fotos-count">📷 ${p.images.length}</span>` : ""}
+      ${hasMultiplePhotos ? `
+        <button type="button" class="card-nav-arrow prev" aria-label="Foto anterior">‹</button>
+        <button type="button" class="card-nav-arrow next" aria-label="Foto siguiente">›</button>
+        <span class="fotos-count">📷 1/${p.images.length}</span>
+      ` : ""}
       ${agotado ? `<span class="badge agotado-tag">Agotado</span>` : ""}
     </div>
     <div class="card-body">
@@ -839,8 +933,41 @@ function renderCard(p){
     </div>
   `;
 
-  el.querySelector(".card-art").addEventListener("click", () => openQuickView(p));
+  let wasSwipe = false;
+  el.querySelector(".card-art").addEventListener("click", () => {
+    if (wasSwipe){ wasSwipe = false; return; }
+    openQuickView(p);
+  });
   el.querySelector(".card-heart").addEventListener("click", (e) => { e.stopPropagation(); toggleWishlist(p.id); });
+
+  /* si el producto tiene varias fotos: flechas para cambiar de foto sin
+     tener que abrir la vista rápida, y deslizar con el dedo en el celular */
+  if (hasMultiplePhotos){
+    let photoIdx = 0;
+    const art = el.querySelector(".card-art");
+    const imgEl = art.querySelector("img");
+    const countBadge = art.querySelector(".fotos-count");
+    const showPhoto = (i) => {
+      photoIdx = (i + p.images.length) % p.images.length;
+      imgEl.src = p.images[photoIdx];
+      countBadge.textContent = `📷 ${photoIdx+1}/${p.images.length}`;
+    };
+    art.querySelector(".card-nav-arrow.prev").addEventListener("click", (e) => { e.stopPropagation(); showPhoto(photoIdx - 1); });
+    art.querySelector(".card-nav-arrow.next").addEventListener("click", (e) => { e.stopPropagation(); showPhoto(photoIdx + 1); });
+
+    let startX = 0, dx = 0, swiping = false;
+    art.addEventListener("touchstart", (e) => { startX = e.touches[0].clientX; dx = 0; swiping = true; }, { passive:true });
+    art.addEventListener("touchmove", (e) => { if (swiping) dx = e.touches[0].clientX - startX; }, { passive:true });
+    art.addEventListener("touchend", () => {
+      if (!swiping) return;
+      swiping = false;
+      if (Math.abs(dx) > 40){
+        wasSwipe = true;
+        setTimeout(() => { wasSwipe = false; }, 400); // por si el navegador no dispara el clic después
+        showPhoto(dx < 0 ? photoIdx + 1 : photoIdx - 1);
+      }
+    });
+  }
   el.querySelector(".qm").addEventListener("click", () => changeQtyDraft(p.id, -1));
   el.querySelector(".qp").addEventListener("click", () => changeQtyDraft(p.id, 1, stock));
   el.querySelector(".btn-add").addEventListener("click", () => addToCart(p.id, stock));
@@ -990,27 +1117,40 @@ function updateQvSlide(){
 $("#qvPrev").addEventListener("click", () => { qvIndex = (qvIndex - 1 + qvImages.length) % qvImages.length; updateQvSlide(); });
 $("#qvNext").addEventListener("click", () => { qvIndex = (qvIndex + 1) % qvImages.length; updateQvSlide(); });
 
-/* deslizar con el dedo para cambiar de foto */
+/* deslizar para cambiar de foto — con el dedo en el celular, y arrastrando
+   con el mouse en la computadora (las dos formas funcionan igual) */
 (function(){
   const track = $("#qvTrack");
   let startX = 0, deltaX = 0, dragging = false;
-  track.addEventListener("touchstart", (e) => {
+
+  function start(x){
     if (qvImages.length < 2) return;
-    dragging = true; startX = e.touches[0].clientX; track.style.transition = "none";
-  }, { passive:true });
-  track.addEventListener("touchmove", (e) => {
+    dragging = true; startX = x; deltaX = 0; track.style.transition = "none";
+  }
+  function move(x){
     if (!dragging) return;
-    deltaX = e.touches[0].clientX - startX;
+    deltaX = x - startX;
     track.style.transform = `translateX(calc(-${qvIndex*100}% + ${deltaX}px))`;
-  }, { passive:true });
-  track.addEventListener("touchend", () => {
+  }
+  function finish(){
     if (!dragging) return;
     dragging = false; track.style.transition = "";
     if (deltaX < -50 && qvIndex < qvImages.length-1) qvIndex++;
     else if (deltaX > 50 && qvIndex > 0) qvIndex--;
     deltaX = 0;
     updateQvSlide();
-  });
+  }
+
+  // dedo (celular / tablet)
+  track.addEventListener("touchstart", (e) => start(e.touches[0].clientX), { passive:true });
+  track.addEventListener("touchmove", (e) => move(e.touches[0].clientX), { passive:true });
+  track.addEventListener("touchend", finish);
+
+  // mouse (computadora): clic y arrastrar
+  track.addEventListener("mousedown", (e) => { start(e.clientX); e.preventDefault(); });
+  window.addEventListener("mousemove", (e) => { if (dragging) move(e.clientX); });
+  window.addEventListener("mouseup", finish);
+  track.addEventListener("dragstart", (e) => e.preventDefault()); // evita que el navegador arrastre la imagen sola
 })();
 
 function updateQvInfo(){
