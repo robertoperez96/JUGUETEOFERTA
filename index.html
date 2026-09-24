@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-<title>Juguete Oferta MX · Catálogo</title>
-<meta name="description" content="Catálogo de juguetes de Juguete Oferta MX. Apártalo por WhatsApp.">
+<title>Juguete Oferta Tabasco · Catálogo</title>
+<meta name="description" content="Catálogo de juguetes de Juguete Oferta Tabasco. Apártalo por WhatsApp.">
 <link rel="icon" href="favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="favicon.png">
 <meta name="theme-color" content="#FFC93C">
@@ -15,7 +15,7 @@
 
 <style>
   /* =====================================================================
-     PALETA — inspirada en el logo de Juguete Oferta MX (colores vivos
+     PALETA — inspirada en el logo de Juguete Oferta Tabasco (colores vivos
      de juguete: rojo, amarillo, azul, verde, sobre fondo claro).
      ===================================================================== */
   :root{
@@ -30,7 +30,7 @@
     --sombra:0 10px 26px -14px rgba(35,41,70,.28);
     --sombra-fuerte:0 16px 34px -12px rgba(35,41,70,.32);
     --radio-s:10px; --radio-m:16px; --radio-l:26px;
-    --fuente-titulo:'Baloo 2',cursive; --fuente-cuerpo:'Nunito',sans-serif;
+    --fuente-titulo:'Baloo 2','Trebuchet MS',sans-serif; --fuente-cuerpo:'Nunito',sans-serif;
   }
   *{box-sizing:border-box;}
   html{scroll-behavior:smooth;}
@@ -102,7 +102,8 @@
   }
   .hero h1{font-size:clamp(22px,3.6vw,32px);color:var(--tinta);line-height:1.15;}
   .hero h1 span{color:var(--rojo);}
-  .hero p{color:var(--tinta-suave);font-size:14.5px;margin:6px 0 0;font-weight:700;}
+  .hero p{color:var(--tinta-suave);font-size:14.5px;margin:6px 0 0;font-weight:700;display:inline-flex;align-items:center;gap:6px;}
+  .hero-wa-icon{flex-shrink:0;}
   .search-wrap{width:100%;max-width:400px;margin:14px auto 0;position:relative;}
   .search-wrap input{
     width:100%;padding:13px 18px 13px 42px;border-radius:999px;border:2px solid var(--borde);
@@ -231,11 +232,14 @@
   .cart-bar .info .count{background:var(--amarillo);color:#3a2a00;border-radius:999px;padding:2px 9px;font-size:12.5px;}
   .cart-bar .ver{background:var(--verde);color:#0b3d21;border:none;border-radius:999px;padding:9px 16px;font-weight:800;font-size:13.5px;}
 
-  /* ---------- botón grande de admin (agregar producto) ---------- */
+  /* ---------- botón grande de admin (agregar producto) ----------
+     Oculto para cualquier visitante normal — solo aparece cuando ya
+     entraste como administrador (con el enlace discreto de hasta abajo
+     de la página). Así no invita a que cualquiera lo toque. */
   .admin-fab{
     position:fixed;right:16px;bottom:88px;z-index:75;background:var(--rojo);color:#fff;border:none;
     border-radius:999px;width:64px;height:64px;font-size:30px;box-shadow:0 12px 26px -8px rgba(244,68,46,.55);
-    display:flex;align-items:center;justify-content:center;transition:transform .15s;
+    display:none;align-items:center;justify-content:center;transition:transform .15s;
   }
   .admin-fab:active{transform:scale(.92);}
   body.admin-mode .admin-fab{width:auto;padding:0 22px 0 20px;border-radius:999px;gap:9px;display:flex;font-size:15px;font-weight:800;}
@@ -395,18 +399,18 @@
 
   /* =====================================================================
      AJUSTES ESPECÍFICOS PARA CELULAR — encabezado más compacto para que
-     el logo y "Juguete Oferta MX" siempre quepan completos, categorías
+     el logo y "Juguete Oferta Tabasco" siempre quepan completos, categorías
      más grandes y visibles, y selector de vista de 1 o 2 columnas.
      ===================================================================== */
   @media (max-width:480px){
-    .wrap.site-bar{padding:0 12px;gap:8px;}
-    .brand{gap:6px;}
-    .brand img{height:44px;width:44px;}
-    .brand-word{font-size:clamp(12px,4.2vw,15px);}
-    .header-actions{gap:5px;}
-    .icon-btn{width:33px;height:33px;font-size:14.5px;}
-    .icon-btn.whatsapp-header svg{width:16px;height:16px;}
-    .cart-count{min-width:16px;height:16px;font-size:9px;top:-4px;right:-4px;border-width:1.5px;}
+    .wrap.site-bar{padding:0 10px;gap:6px;}
+    .brand{gap:5px;}
+    .brand img{height:40px;width:40px;}
+    .brand-word{font-size:clamp(10.5px,3.7vw,14px);}
+    .header-actions{gap:4px;}
+    .icon-btn{width:32px;height:32px;font-size:14px;}
+    .icon-btn.whatsapp-header svg{width:15px;height:15px;}
+    .cart-count{min-width:15px;height:15px;font-size:8.5px;top:-4px;right:-4px;border-width:1.5px;}
   }
   @media (max-width:640px){
     .cat-nav{padding:14px 0;box-shadow:0 3px 10px -6px rgba(35,41,70,.2);}
@@ -440,8 +444,8 @@
 <header class="site">
   <div class="wrap site-bar">
     <a href="#" class="brand">
-      <img src="logo.png" alt="Juguete Oferta MX">
-      <span class="brand-word">Juguete <span>Oferta</span> MX</span>
+      <img src="logo.png" alt="Juguete Oferta Tabasco">
+      <span class="brand-word">Juguete <span>Oferta</span> Tabasco</span>
     </a>
     <div class="header-actions">
       <a id="whatsappHeaderBtn" class="icon-btn whatsapp-header" href="#" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp">
@@ -461,11 +465,13 @@
   <div class="wrap hero-inner">
     <div class="hero-logo-wrap">
       <div class="hero-logo-glow"></div>
-      <img class="hero-logo" src="logo.png" alt="Juguete Oferta MX">
+      <img class="hero-logo" src="logo.png" alt="Juguete Oferta Tabasco">
     </div>
     <div class="hero-text">
       <h1>Los mejores <span>juguetes</span>, al mejor precio</h1>
-      <p>Aparta el tuyo y confirma por WhatsApp 🎉</p>
+      <p>Agrega al carrito y confirma por WhatsApp
+        <svg class="hero-wa-icon" viewBox="0 0 24 24" width="16" height="16" fill="#25D366" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.35 5.08L2 22l5.05-1.32C8.5 21.5 10.2 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm5.2 13.9c-.24.66-1.38 1.26-1.9 1.32-.5.06-1.02.29-3.4-.72-2.87-1.22-4.72-4.14-4.87-4.33-.14-.19-1.16-1.55-1.16-2.96 0-1.4.74-2.09 1-2.38.26-.28.57-.35.76-.35h.55c.18 0 .42-.03.64.5.24.57.8 1.98.87 2.12.07.14.11.31.02.5-.09.18-.14.29-.27.45-.14.16-.29.35-.41.47-.14.14-.28.29-.12.57.16.28.71 1.18 1.53 1.92 1.05.95 1.94 1.25 2.21 1.39.28.14.44.12.6-.07.16-.19.68-.79.87-1.06.18-.28.36-.23.6-.14.24.09 1.55.74 1.82.87.27.14.45.2.51.32.07.12.07.68-.17 1.33z"/></svg>
+      </p>
       <div class="search-wrap">
         <span class="lupa">🔎</span>
         <input id="searchInput" type="text" placeholder="Busca un juguete…">
@@ -497,7 +503,7 @@
 </main>
 
 <footer>
-  Juguete Oferta MX — hecho con ❤️
+  Juguete Oferta Tabasco — hecho con ❤️
   <br>
   <button id="adminLoginTrigger" class="salir-admin" hidden>Entrar como administrador</button>
   <button id="adminLogoutBtn" class="salir-admin" hidden>Salir del modo administrador</button>
@@ -1218,17 +1224,43 @@ let pendingAfterLogin = null;
 $("#passwordSubmit").addEventListener("click", submitPassword);
 $("#passwordInput").addEventListener("keydown", (e) => { if (e.key === "Enter") submitPassword(); });
 
-function submitPassword(){
+async function submitPassword(){
   const pw = $("#passwordInput").value.trim();
-  if (!pw){ $("#passwordMsg").textContent = "Escribe la contraseña."; return; }
-  // Guardamos la contraseña localmente; el Worker la valida de verdad
-  // en cada acción (agregar/editar/borrar). Si es incorrecta, se borra
-  // sola y se vuelve a pedir.
-  localStorage.setItem("jomx_admin_pw", pw);
-  setAdminMode(true);
-  closeOverlay("passwordOverlay");
-  toast("Modo administrador activado ✅");
-  if (pendingAfterLogin){ pendingAfterLogin(); pendingAfterLogin = null; }
+  const msgEl = $("#passwordMsg");
+  const btn = $("#passwordSubmit");
+  if (!pw){ msgEl.textContent = "Escribe la contraseña."; return; }
+  if (WORKER_URL.includes("TU-WORKER")){ msgEl.textContent = "Falta configurar WORKER_URL en el código (ver worker.js)."; return; }
+
+  // Verificamos la contraseña contra el servidor ANTES de mostrar el
+  // panel de administrador — así una contraseña incorrecta nunca deja
+  // ver los botones de editar/borrar, ni de casualidad.
+  btn.disabled = true;
+  msgEl.style.color = "var(--tinta-suave)";
+  msgEl.textContent = "Verificando…";
+  try {
+    const res = await fetch(`${WORKER_URL}/verificar-clave`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: pw }),
+    });
+    const data = await res.json();
+    if (!data.ok){
+      msgEl.style.color = "var(--rojo-oscuro)";
+      msgEl.textContent = "Contraseña incorrecta.";
+      btn.disabled = false;
+      return;
+    }
+    localStorage.setItem("jomx_admin_pw", pw);
+    setAdminMode(true);
+    closeOverlay("passwordOverlay");
+    toast("Modo administrador activado ✅");
+    if (pendingAfterLogin){ pendingAfterLogin(); pendingAfterLogin = null; }
+  } catch (err) {
+    msgEl.style.color = "var(--rojo-oscuro)";
+    msgEl.textContent = "No se pudo conectar con el servidor. Revisa tu internet.";
+  } finally {
+    btn.disabled = false;
+  }
 }
 
 $("#adminLoginTrigger").addEventListener("click", () => requireAdmin(() => {}));
@@ -1552,6 +1584,21 @@ async function deleteProduct(product, onDone){
    ===================================================================== */
 setAdminMode(isAdmin());
 $("#adminLoginTrigger").hidden = isAdmin();
+if (isAdmin() && !WORKER_URL.includes("TU-WORKER")){
+  // revisa en silencio que la contraseña guardada siga siendo válida
+  // (por si alguna vez cambian la contraseña en Cloudflare)
+  fetch(`${WORKER_URL}/verificar-clave`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ password: getAdminPassword() }),
+  }).then(r => r.json()).then(data => {
+    if (!data.ok){
+      localStorage.removeItem("jomx_admin_pw");
+      setAdminMode(false);
+      $("#adminLoginTrigger").hidden = false;
+    }
+  }).catch(() => {}); // sin internet, lo dejamos como estaba
+}
 updateWishlistUI();
 loadProducts();
 </script>
