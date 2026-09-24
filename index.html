@@ -757,10 +757,10 @@
       <div id="cartList" style="margin-top:14px;"></div>
       <div class="cart-total-row"><span>Total</span><span id="cartTotal">$0</span></div>
       <div class="form-actions">
-        <a class="btn btn-whatsapp" id="cartWhatsappBtn" href="#" target="_blank" rel="noopener">
+        <button type="button" class="btn btn-whatsapp" id="cartWhatsappBtn">
           <svg viewBox="0 0 24 24" fill="#fff" width="19" height="19"><path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.35 5.08L2 22l5.05-1.32C8.5 21.5 10.2 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm5.2 13.9c-.24.66-1.38 1.26-1.9 1.32-.5.06-1.02.29-3.4-.72-2.87-1.22-4.72-4.14-4.87-4.33-.14-.19-1.16-1.55-1.16-2.96 0-1.4.74-2.09 1-2.38.26-.28.57-.35.76-.35h.55c.18 0 .42-.03.64.5.24.57.8 1.98.87 2.12.07.14.11.31.02.5-.09.18-.14.29-.27.45-.14.16-.29.35-.41.47-.14.14-.28.29-.12.57.16.28.71 1.18 1.53 1.92 1.05.95 1.94 1.25 2.21 1.39.28.14.44.12.6-.07.16-.19.68-.79.87-1.06.18-.28.36-.23.6-.14.24.09 1.55.74 1.82.87.27.14.45.2.51.32.07.12.07.68-.17 1.33z"/></svg>
-          Terminar por WhatsApp
-        </a>
+          <span id="cartWhatsappBtnText">Terminar por WhatsApp</span>
+        </button>
       </div>
     </div>
   </div>
@@ -841,6 +841,12 @@
    ===================================================================== */
 const WORKER_URL = "https://jugueteoferta.roberto-perezc96.workers.dev"; // <-- URL de tu Worker "jugueteoferta"
 const WHATSAPP_PHONE = "529931762263"; // WhatsApp del negocio, formato: 52 + 10 dígitos
+// URL "oficial" y corta del sitio — se usa para armar los links que se
+// comparten (el resumen de pedido, "compartir producto"), para que sean
+// siempre igual de cortos sin importar si lo estás viendo desde GitHub
+// Pages, Netlify, o cualquier otro lado. Si cambias de dominio, actualiza
+// esto también.
+const SITE_URL = "https://jugueteoferta.netlify.app/";
 
 const DEFAULT_CATEGORIES = [
   { id: "munecas",   label: "Muñecas y Peluches",       emoji: "🧸" },
@@ -1389,24 +1395,50 @@ function updateCartUI(){
     }));
   }
 
-  // link de WhatsApp con el resumen del pedido
+}
+
+// Se arma y se manda al tocar el botón (no antes) — así solo se crea un
+// código de pedido cuando de verdad se va a confirmar, y no cada vez que
+// se agrega o quita algo del carrito.
+$("#cartWhatsappBtn").addEventListener("click", async () => {
+  const entries = cartEntries();
+  const count = entries.reduce((s, e) => s + e.qty, 0);
+  const total = entries.reduce((s, e) => s + e.product.price * e.qty, 0);
+  const btn = $("#cartWhatsappBtn");
+  const btnText = $("#cartWhatsappBtnText");
+
+  // abrimos la pestaña ya mismo (en blanco) para que el navegador no la
+  // bloquee — como el pedido corto se pide por internet, para cuando esté
+  // listo ya pasó un instante y algunos celulares ya no dejan abrir una
+  // pestaña nueva si no fue AL TOQUE del clic
+  const win = window.open("", "_blank");
+
+  btn.disabled = true;
+  const prevText = btnText.textContent;
+  btnText.textContent = "Preparando…";
+
   // (todo el mensaje se codifica UNA sola vez con encodeURIComponent al
   // final — antes se mezclaban "%0A" sueltos con texto sin codificar, lo
   // que armaba un link inválido que en el celular WhatsApp no sabía leer
   // y por eso mandaba a "invitar" en vez de abrir el chat correcto)
   let msg = "Hola 👋, quiero apartar este pedido:\n\n";
-  entries.forEach(({product,qty}) => {
-    msg += `• ${product.name} x${qty} — ${money(product.price*qty)}\n`;
+  entries.forEach(({ product, qty }) => {
+    msg += `• ${product.name} x${qty} — ${money(product.price * qty)}\n`;
   });
   msg += `\nTotal: ${money(total)}`;
-  // además del texto, agregamos un link con el resumen del pedido — al
-  // abrirlo (por ejemplo desde WhatsApp) se ve esta misma lista, y si quien
-  // lo abre entró como administrador, ahí mismo puede marcar cada pieza
-  // como vendida y se descuenta del stock (ver buildPedidoLink más abajo)
-  if (count) msg += `\n\nVer resumen: ${buildPedidoLink(entries)}`;
+
+  if (count){
+    const link = await buildPedidoLink(entries);
+    if (link) msg += `\n\nVer resumen: ${link}`;
+  }
+
   const waLink = `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(count ? msg : "Hola, tengo una duda sobre un producto 🙂")}`;
-  $("#cartWhatsappBtn").href = waLink;
-}
+  if (win) win.location.href = waLink;
+  else location.href = waLink; // por si el navegador bloqueó la pestaña nueva
+
+  btn.disabled = false;
+  btnText.textContent = prevText;
+});
 
 $("#cartOpenBtn").addEventListener("click", () => openOverlay("cartOverlay"));
 $("#cartBarBtn").addEventListener("click", () => openOverlay("cartOverlay"));
@@ -1415,33 +1447,56 @@ $("#whatsappHeaderBtn").addEventListener("click", (e) => {
 });
 
 /* =====================================================================
-   RESUMEN DE PEDIDO COMPARTIDO — el link "?pedido=..." que va dentro del
-   mensaje de WhatsApp. No se guarda nada en el servidor para esto: el link
-   ya trae el id y la cantidad de cada pieza, y al abrirse busca esos
-   productos en el catálogo que ya se cargó. Si quien lo abre entró como
-   administrador, cada pieza tiene un botón para marcarla vendida y restar
-   esa cantidad del stock en Cloudflare.
+   RESUMEN DE PEDIDO COMPARTIDO — el link "?pedido=XXXXXX" que va dentro
+   del mensaje de WhatsApp. El carrito (id + cantidad de cada pieza) se
+   guarda en Cloudflare con /crear-pedido, que devuelve un código cortito
+   de 6 letras/números — así el link es corto sin importar cuántas piezas
+   ni qué tan largo sea el id de cada producto. También usamos SITE_URL en
+   vez de la URL desde donde se esté viendo el sitio (GitHub Pages o
+   Netlify), para que el link sea siempre el mismo, cortito y consistente.
+   Al abrirse, /pedido busca esa lista guardada y muestra el resumen. Si
+   quien lo abre entró como administrador, cada pieza tiene un botón para
+   marcarla vendida y restar esa cantidad del stock.
    ===================================================================== */
 
-// arma el link compacto "id~cantidad,id~cantidad" a partir del carrito
-function buildPedidoLink(entries){
-  const orderParam = entries.map(({product,qty}) => `${product.id}~${qty}`).join(",");
-  const params = new URLSearchParams();
-  params.set("pedido", orderParam);
-  return `${location.origin}${location.pathname}?${params.toString()}`;
+// guarda el carrito en Cloudflare y arma el link cortito; si por algo
+// falla (sin internet, etc.) devuelve null y el pedido se manda igual,
+// solo que sin el link
+async function buildPedidoLink(entries){
+  try {
+    const items = entries.map(({ product, qty }) => ({ id: product.id, qty }));
+    const res = await fetch(`${WORKER_URL}/crear-pedido`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ items }),
+    });
+    const data = await res.json();
+    if (!data.ok || !data.code) return null;
+    return `${SITE_URL}?pedido=${data.code}`;
+  } catch (err) {
+    console.error("No se pudo crear el link corto del pedido:", err);
+    return null;
+  }
 }
 
-// revisa si la URL trae "?pedido=..." y, si sí, muestra el resumen
-function checkPedidoLink(){
-  const raw = new URLSearchParams(location.search).get("pedido");
-  if (!raw) return;
-  const items = raw.split(",").map((part) => {
-    const [id, qtyStr] = part.split("~");
-    return { id: (id || "").trim(), qty: Math.max(1, parseInt(qtyStr, 10) || 1) };
-  }).filter((it) => it.id);
-  if (!items.length) return;
-  renderPedidoView(items);
-  openOverlay("pedidoOverlay");
+// revisa si la URL trae "?pedido=XXXXXX" y, si sí, trae esa lista guardada
+// y muestra el resumen
+async function checkPedidoLink(){
+  const code = (new URLSearchParams(location.search).get("pedido") || "").trim();
+  if (!code) return;
+  try {
+    const res = await fetch(`${WORKER_URL}/pedido?codigo=${encodeURIComponent(code)}`);
+    const data = await res.json();
+    const items = Array.isArray(data.items) ? data.items.filter((it) => it && it.id) : [];
+    if (!items.length){
+      toast("Ese link de pedido ya no está disponible.");
+      return;
+    }
+    renderPedidoView(items);
+    openOverlay("pedidoOverlay");
+  } catch (err) {
+    console.error("No se pudo abrir el resumen del pedido:", err);
+  }
 }
 
 function renderPedidoView(items){
@@ -1648,7 +1703,7 @@ $("#qvShareBtn").addEventListener("click", () => shareProduct(currentQvProduct))
 
 function shareProduct(product){
   if (!product) return;
-  const url = new URL(location.href);
+  const url = new URL(SITE_URL);
   url.searchParams.set("producto", product.id);
   const shareData = { title: product.name, text: `Mira este juguete: ${product.name} — ${money(product.price)}`, url: url.toString() };
   if (navigator.share){
