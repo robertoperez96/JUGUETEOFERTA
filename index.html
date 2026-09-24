@@ -501,6 +501,16 @@
     .grid.view-2col .btn-add{height:28px;font-size:10.5px;gap:3px;flex-basis:100%;}
     .grid.view-2col .admin-bar{padding:0 9px 9px;gap:4px;flex-wrap:wrap;}
     .grid.view-2col .admin-bar button{font-size:9.5px;padding:6px 3px;}
+
+    /* Respiro extra abajo en el celular para que la insignia "Powered by
+       Netlify" (la agrega Netlify solo, no es parte de este sitio) no tape
+       el texto del carrito ni los botones de las ventanas emergentes. Lo
+       más limpio es desactivarla desde Netlify (Project configuration →
+       General → "Powered by Netlify badge"), pero dejamos este respiro por
+       si acaso. */
+    .cart-bar{bottom:74px;}
+    .sheet{padding-bottom:84px;}
+    body{padding-bottom:130px;}
   }
 </style>
 </head>
@@ -1342,12 +1352,16 @@ function updateCartUI(){
   }
 
   // link de WhatsApp con el resumen del pedido
-  let msg = "Hola 👋, quiero apartar este pedido:%0A%0A";
+  // (todo el mensaje se codifica UNA sola vez con encodeURIComponent al
+  // final — antes se mezclaban "%0A" sueltos con texto sin codificar, lo
+  // que armaba un link inválido que en el celular WhatsApp no sabía leer
+  // y por eso mandaba a "invitar" en vez de abrir el chat correcto)
+  let msg = "Hola 👋, quiero apartar este pedido:\n\n";
   entries.forEach(({product,qty}) => {
-    msg += `• ${product.name} x${qty} — ${money(product.price*qty)}%0A`;
+    msg += `• ${product.name} x${qty} — ${money(product.price*qty)}\n`;
   });
-  msg += `%0ATotal: ${money(total)}`;
-  const waLink = `https://wa.me/${WHATSAPP_PHONE}?text=${count ? msg : encodeURIComponent("Hola, tengo una duda sobre un producto 🙂")}`;
+  msg += `\nTotal: ${money(total)}`;
+  const waLink = `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(count ? msg : "Hola, tengo una duda sobre un producto 🙂")}`;
   $("#cartWhatsappBtn").href = waLink;
 }
 
