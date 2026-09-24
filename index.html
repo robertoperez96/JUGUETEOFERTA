@@ -397,6 +397,25 @@
   .cart-total-row{display:flex;justify-content:space-between;align-items:center;padding:16px 0 6px;font-family:var(--fuente-titulo);font-size:19px;font-weight:700;}
   .cart-empty{text-align:center;padding:30px 10px;color:var(--tinta-suave);font-weight:700;}
 
+  /* resumen de un pedido compartido por link (ver worker.js / buildPedidoLink) */
+  .pedido-hint{font-size:13px;color:var(--tinta-suave);font-weight:700;margin-top:4px;}
+  .pedido-list{display:flex;flex-direction:column;margin-top:14px;}
+  .pedido-item{display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--borde);flex-wrap:wrap;}
+  .pedido-item img{width:56px;height:56px;border-radius:10px;object-fit:cover;background:var(--borde);flex-shrink:0;}
+  .pedido-item-info{flex:1;min-width:130px;}
+  .pedido-item-info .n{font-weight:800;font-size:14px;}
+  .pedido-item-info .cat{font-size:11px;color:var(--tinta-suave);font-weight:700;margin:1px 0;}
+  .pedido-item-info .p{font-size:12.5px;color:var(--tinta-suave);font-weight:700;}
+  .pedido-item-missing .pedido-item-info .n{color:var(--tinta-suave);font-style:italic;font-weight:700;}
+  .pedido-sold-btn{
+    display:none; /* solo se ve en modo administrador */
+    flex-shrink:0;padding:8px 12px;border-radius:9px;border:2px solid var(--rojo);
+    background:rgba(244,68,46,.08);color:var(--rojo-oscuro);font-weight:800;font-size:12px;
+  }
+  body.admin-mode .pedido-sold-btn{display:inline-flex;align-items:center;}
+  .pedido-sold-btn:disabled{opacity:.65;}
+  .pedido-item.done .pedido-sold-btn{border-color:var(--verde-oscuro);background:rgba(61,220,132,.14);color:var(--verde-oscuro);}
+
   /* corazón de favoritos sobre la tarjeta */
   .card-heart{
     position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:999px;
@@ -747,6 +766,22 @@
   </div>
 </div>
 
+<!-- ============== overlay: resumen de un pedido compartido por link ============== -->
+<div id="pedidoOverlay" class="overlay">
+  <div class="sheet-wrap">
+    <div class="sheet" id="pedidoSheet">
+      <button class="close-x" data-close="pedidoOverlay">✕</button>
+      <h2>📦 Resumen de pedido</h2>
+      <div class="pedido-hint">Estas son las piezas de este pedido.</div>
+      <div id="pedidoList" class="pedido-list"></div>
+      <div class="cart-total-row"><span>Total</span><span id="pedidoTotal">$0</span></div>
+      <div class="form-actions">
+        <button class="btn btn-secondary" data-close="pedidoOverlay">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ============== overlay: favoritos ============== -->
 <div id="wishlistOverlay" class="overlay">
   <div class="sheet-wrap">
@@ -985,13 +1020,16 @@ async function loadProducts(){
   render();
 
   // si el link traía "?producto=ID" (por ejemplo compartido por WhatsApp),
-  // abre esa vista rápida automáticamente, solo la primera vez que carga
+  // abre esa vista rápida automáticamente, solo la primera vez que carga.
+  // Si en cambio traía "?pedido=...", abre el resumen de ese pedido.
   if (!deepLinkHandled){
     deepLinkHandled = true;
     const sharedId = new URLSearchParams(location.search).get("producto");
     if (sharedId){
       const shared = products.find(p => p.id === sharedId);
       if (shared) openQuickView(shared);
+    } else {
+      checkPedidoLink();
     }
   }
 }
@@ -1361,6 +1399,11 @@ function updateCartUI(){
     msg += `• ${product.name} x${qty} — ${money(product.price*qty)}\n`;
   });
   msg += `\nTotal: ${money(total)}`;
+  // además del texto, agregamos un link con el resumen del pedido — al
+  // abrirlo (por ejemplo desde WhatsApp) se ve esta misma lista, y si quien
+  // lo abre entró como administrador, ahí mismo puede marcar cada pieza
+  // como vendida y se descuenta del stock (ver buildPedidoLink más abajo)
+  if (count) msg += `\n\nVer resumen: ${buildPedidoLink(entries)}`;
   const waLink = `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(count ? msg : "Hola, tengo una duda sobre un producto 🙂")}`;
   $("#cartWhatsappBtn").href = waLink;
 }
@@ -1370,6 +1413,112 @@ $("#cartBarBtn").addEventListener("click", () => openOverlay("cartOverlay"));
 $("#whatsappHeaderBtn").addEventListener("click", (e) => {
   e.currentTarget.href = `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent("Hola, tengo una duda sobre un producto 🙂")}`;
 });
+
+/* =====================================================================
+   RESUMEN DE PEDIDO COMPARTIDO — el link "?pedido=..." que va dentro del
+   mensaje de WhatsApp. No se guarda nada en el servidor para esto: el link
+   ya trae el id y la cantidad de cada pieza, y al abrirse busca esos
+   productos en el catálogo que ya se cargó. Si quien lo abre entró como
+   administrador, cada pieza tiene un botón para marcarla vendida y restar
+   esa cantidad del stock en Cloudflare.
+   ===================================================================== */
+
+// arma el link compacto "id~cantidad,id~cantidad" a partir del carrito
+function buildPedidoLink(entries){
+  const orderParam = entries.map(({product,qty}) => `${product.id}~${qty}`).join(",");
+  const params = new URLSearchParams();
+  params.set("pedido", orderParam);
+  return `${location.origin}${location.pathname}?${params.toString()}`;
+}
+
+// revisa si la URL trae "?pedido=..." y, si sí, muestra el resumen
+function checkPedidoLink(){
+  const raw = new URLSearchParams(location.search).get("pedido");
+  if (!raw) return;
+  const items = raw.split(",").map((part) => {
+    const [id, qtyStr] = part.split("~");
+    return { id: (id || "").trim(), qty: Math.max(1, parseInt(qtyStr, 10) || 1) };
+  }).filter((it) => it.id);
+  if (!items.length) return;
+  renderPedidoView(items);
+  openOverlay("pedidoOverlay");
+}
+
+function renderPedidoView(items){
+  const wrap = $("#pedidoList");
+  let total = 0;
+  wrap.innerHTML = items.map(({ id, qty }) => {
+    const p = products.find((pp) => pp.id === id);
+    if (!p){
+      return `
+        <div class="pedido-item pedido-item-missing">
+          <div class="pedido-item-info">
+            <div class="n">Este producto ya no está disponible</div>
+          </div>
+        </div>
+      `;
+    }
+    const subtotal = p.price * qty;
+    total += subtotal;
+    const info = catInfo(p.category);
+    return `
+      <div class="pedido-item" data-id="${p.id}" data-qty="${qty}">
+        <img src="${(p.images && p.images[0]) || ""}" alt="">
+        <div class="pedido-item-info">
+          <div class="n">${p.name}${qty > 1 ? ` ×${qty}` : ""}</div>
+          <div class="cat">${info.emoji} ${info.label}</div>
+          <div class="p">${money(subtotal)}</div>
+        </div>
+        <button type="button" class="pedido-sold-btn" data-id="${p.id}" data-qty="${qty}">Marcar como vendido</button>
+      </div>
+    `;
+  }).join("");
+  $("#pedidoTotal").textContent = money(total);
+  wrap.querySelectorAll(".pedido-sold-btn").forEach((btn) => {
+    btn.addEventListener("click", () => markPedidoItemSold(btn));
+  });
+}
+
+function markPedidoItemSold(btn){
+  requireAdmin(async () => {
+    const id = btn.dataset.id;
+    const qty = Number(btn.dataset.qty) || 1;
+    const product = products.find((p) => p.id === id);
+    if (!product) return;
+    btn.disabled = true;
+    btn.textContent = "Guardando…";
+    const newStock = Math.max(0, Number(product.stock || 0) - qty);
+    try {
+      const res = await fetch(`${WORKER_URL}/guardar-producto`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: getAdminPassword(), product: { id, stock: newStock } }),
+      });
+      if (res.status === 401){
+        handleAuthError();
+        btn.disabled = false;
+        btn.textContent = "Marcar como vendido";
+        return;
+      }
+      const data = await res.json();
+      if (data.ok){
+        product.stock = newStock;
+        btn.textContent = "✅ Vendido";
+        btn.closest(".pedido-item").classList.add("done");
+        toast(`Se restaron ${qty} del stock ✅`);
+        render();
+      } else {
+        btn.disabled = false;
+        btn.textContent = "Marcar como vendido";
+        toast(data.error || "No se pudo actualizar.");
+      }
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = "Marcar como vendido";
+      toast("No se pudo conectar con el servidor.");
+    }
+  });
+}
 
 /* =====================================================================
    BÚSQUEDA
