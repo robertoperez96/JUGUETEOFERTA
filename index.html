@@ -307,6 +307,18 @@
   .backup-create-btn:active{transform:scale(.98);}
   .backup-create-btn:disabled{opacity:.6;}
 
+  /* ---------- modal: optimizar fotos del catálogo ---------- */
+  .optimize-hint{font-size:13px;color:var(--tinta-suave);font-weight:700;margin-top:4px;}
+  .optimize-status{
+    margin-top:14px;background:var(--blanco);border:2px solid var(--borde);border-radius:12px;
+    padding:14px;text-align:center;
+  }
+  .optimize-status .n{font-family:var(--fuente-titulo);font-size:28px;font-weight:700;color:var(--tinta);}
+  .optimize-status .lb{font-size:12.5px;font-weight:700;color:var(--tinta-suave);margin-top:2px;}
+  .optimize-progress-bar{height:10px;border-radius:999px;background:var(--crema);overflow:hidden;margin-top:14px;}
+  .optimize-progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--verde),var(--azul));transition:width .2s;}
+  .optimize-log{margin-top:10px;font-size:12px;color:var(--tinta-suave);font-weight:700;text-align:center;min-height:16px;}
+
   /* ---------- catálogo ---------- */
   main{padding:22px 0 40px;}
   .grid{
@@ -690,6 +702,7 @@
 <div class="wrap admin-tools-row">
   <button type="button" id="editCategoriesBtn" class="admin-tool-btn">⚙️ Editar categorías</button>
   <button type="button" id="viewBackupsBtn" class="admin-tool-btn">🗄️ Respaldos</button>
+  <button type="button" id="openOptimizeBtn" class="admin-tool-btn">⚡ Optimizar fotos</button>
 </div>
 
 <main class="wrap">
@@ -903,6 +916,28 @@
       <div class="form-msg" id="backupsMsg"></div>
       <div class="form-actions">
         <button class="btn btn-secondary" data-close="backupsOverlay">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============== overlay: optimizar fotos del catálogo (solo administrador) ============== -->
+<div id="optimizeOverlay" class="overlay">
+  <div class="sheet-wrap">
+    <div class="sheet" id="optimizeSheet">
+      <button class="close-x" data-close="optimizeOverlay">✕</button>
+      <h2>⚡ Optimizar fotos</h2>
+      <div class="optimize-hint">Las fotos que se agregaron antes de esta actualización quedaron guardadas pegadas directo en la información del catálogo, y eso es lo que hace que el sitio tarde en cargar. Este botón las separa para que el catálogo cargue mucho más rápido — no cambia cómo se ven tus fotos, y antes de tocar nada guarda un respaldo por seguridad. Es un solo paso, y las fotos que agregues de ahora en adelante ya cargan rápido solas.</div>
+      <div class="optimize-status" id="optimizeStatus">
+        <div class="n" id="optimizeCount">…</div>
+        <div class="lb">productos con fotos por optimizar</div>
+      </div>
+      <div class="optimize-progress-bar" id="optimizeBar" hidden><div class="optimize-progress-fill" id="optimizeBarFill"></div></div>
+      <div class="optimize-log" id="optimizeLog"></div>
+      <div class="form-msg" id="optimizeMsg"></div>
+      <div class="form-actions">
+        <button class="btn btn-secondary" data-close="optimizeOverlay">Cerrar</button>
+        <button class="btn btn-primary" id="startOptimizeBtn">Empezar</button>
       </div>
     </div>
   </div>
@@ -1166,6 +1201,28 @@ function setAdminMode(on){
   $("#adminLogoutBtn").hidden = !on;
 }
 
+/* =====================================================================
+   FOTOS RÁPIDAS: en vez de guardar cada foto metida dentro del producto
+   (lo que hacía que el catálogo entero se descargara de nuevo, completo,
+   cada vez que alguien entraba al sitio), las fotos se suben por su
+   cuenta al Worker y el producto solo guarda un link cortito hacia ella.
+   Esta función sube la foto SOLO si hace falta (si ya es un link, la deja
+   igual — así no se vuelve a subir una foto que ya estaba subida, ni un
+   link externo que alguien pegó a mano).
+   ===================================================================== */
+async function uploadImageIfNeeded(src){
+  if (!src || !src.startsWith("data:")) return src; // ya es un link (propio o externo), no hay nada que subir
+  const res = await fetch(`${WORKER_URL}/subir-imagen`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ password: getAdminPassword(), image: src }),
+  });
+  if (res.status === 401) { handleAuthError(); throw new Error("Sesión de administrador vencida."); }
+  const data = await res.json();
+  if (!data.ok || !data.url) throw new Error(data.error || "No se pudo subir una foto.");
+  return data.url;
+}
+
 /* ---------------- toast ---------------- */
 let toastTimer;
 function toast(msg){
@@ -1339,27 +1396,36 @@ $("#categoriesSaveBtn").addEventListener("click", async () => {
     return;
   }
   msgEl.style.color = "var(--tinta-suave)";
-  msgEl.textContent = "Guardando…";
+  msgEl.textContent = workingCategories.some(c => c.image && c.image.startsWith("data:")) ? "Subiendo imágenes…" : "Guardando…";
   try {
+    // igual que con las fotos de producto: subir las imágenes de categoría
+    // nuevas por su cuenta, para no meterlas dentro de /categorias (que se
+    // pide cada vez que alguien abre el sitio).
+    const resolvedCategories = await Promise.all(workingCategories.map(async (c) => ({
+      ...c,
+      image: c.image ? await uploadImageIfNeeded(c.image) : null,
+    })));
+    msgEl.textContent = "Guardando…";
+
     const res = await fetch(`${WORKER_URL}/guardar-categorias`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         password: getAdminPassword(),
-        categories: workingCategories.map(c => ({ id: c.id, label: c.label.trim(), emoji: (c.emoji||"").trim() || "🎁", image: c.image || null })),
+        categories: resolvedCategories.map(c => ({ id: c.id, label: c.label.trim(), emoji: (c.emoji||"").trim() || "🎁", image: c.image || null })),
       }),
     });
     if (res.status === 401){ closeOverlay("categoriesOverlay"); handleAuthError(); return; }
     const data = await res.json();
     if (!data.ok){ msgEl.style.color = "var(--rojo-oscuro)"; msgEl.textContent = data.error || "No se pudo guardar."; return; }
-    CATEGORIES = workingCategories.map(c => ({...c}));
+    CATEGORIES = resolvedCategories.map(c => ({...c}));
     closeOverlay("categoriesOverlay");
     toast("Categorías actualizadas ✅");
     renderCategoryNav();
     render();
   } catch (err) {
     msgEl.style.color = "var(--rojo-oscuro)";
-    msgEl.textContent = "No se pudo conectar con el servidor. Revisa tu internet.";
+    msgEl.textContent = err && err.message ? err.message : "No se pudo conectar con el servidor. Revisa tu internet.";
   }
 });
 
@@ -1684,6 +1750,111 @@ async function restoreBackup(id){
 $("#viewBackupsBtn").addEventListener("click", openBackupsViewer);
 
 /* =====================================================================
+   OPTIMIZAR FOTOS — pasa las fotos que quedaron guardadas pegadas directo
+   en el producto o la categoría (de antes de esta actualización) a fotos
+   subidas por su cuenta, para que el catálogo cargue rápido. Las fotos
+   nuevas que se agreguen de ahora en adelante ya se suben así solas — esto
+   es solo para "poner al día" lo que ya estaba en el catálogo.
+   ===================================================================== */
+function countPendingOptimize(){
+  const prodCount = products.filter(p => Array.isArray(p.images) && p.images.some(s => s && s.startsWith("data:"))).length;
+  const catCount = CATEGORIES.filter(c => c.image && c.image.startsWith("data:")).length;
+  return { prodCount, catCount, total: prodCount + catCount };
+}
+
+function openOptimizeViewer(){
+  $("#optimizeMsg").textContent = "";
+  $("#optimizeLog").textContent = "";
+  $("#optimizeBar").hidden = true;
+  $("#optimizeBarFill").style.width = "0%";
+  const { prodCount, catCount, total } = countPendingOptimize();
+  $("#optimizeCount").textContent = total;
+  const parts = [];
+  if (prodCount) parts.push(`${prodCount} producto${prodCount===1?"":"s"}`);
+  if (catCount) parts.push(`${catCount} categoría${catCount===1?"":"s"}`);
+  $("#optimizeStatus").querySelector(".lb").textContent = total ? `${parts.join(" y ")} con fotos por optimizar` : "Ya está todo optimizado ✅";
+  $("#startOptimizeBtn").hidden = total === 0;
+  openOverlay("optimizeOverlay");
+}
+$("#openOptimizeBtn").addEventListener("click", openOptimizeViewer);
+
+$("#startOptimizeBtn").addEventListener("click", async () => {
+  const btn = $("#startOptimizeBtn");
+  const msgEl = $("#optimizeMsg");
+  const logEl = $("#optimizeLog");
+  const bar = $("#optimizeBar");
+  const barFill = $("#optimizeBarFill");
+  const { prodCount, catCount, total } = countPendingOptimize();
+  if (!total) return;
+
+  btn.disabled = true;
+  msgEl.textContent = "";
+  bar.hidden = false;
+
+  try {
+    logEl.textContent = "Haciendo un respaldo por seguridad…";
+    await fetch(`${WORKER_URL}/crear-respaldo`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: getAdminPassword() }),
+    });
+
+    let done = 0;
+
+    const productsToFix = products.filter(p => Array.isArray(p.images) && p.images.some(s => s && s.startsWith("data:")));
+    for (const p of productsToFix){
+      logEl.textContent = `Optimizando "${p.name}"… (${done + 1}/${total})`;
+      const uploadedImages = await Promise.all(p.images.map(uploadImageIfNeeded));
+      const res = await fetch(`${WORKER_URL}/guardar-producto`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: getAdminPassword(), product: { id: p.id, images: uploadedImages } }),
+      });
+      if (res.status === 401){ handleAuthError(); return; }
+      done++;
+      barFill.style.width = Math.round((done / total) * 100) + "%";
+    }
+
+    if (catCount){
+      logEl.textContent = `Optimizando íconos de categoría… (${done + 1}/${total})`;
+      const resolvedCategories = await Promise.all(CATEGORIES.map(async (c) => ({
+        ...c,
+        image: c.image ? await uploadImageIfNeeded(c.image) : null,
+      })));
+      const res = await fetch(`${WORKER_URL}/guardar-categorias`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          password: getAdminPassword(),
+          categories: resolvedCategories.map(c => ({ id: c.id, label: c.label, emoji: c.emoji || "🎁", image: c.image || null })),
+        }),
+      });
+      if (res.status === 401){ handleAuthError(); return; }
+      const data = await res.json();
+      if (data.ok) CATEGORIES = resolvedCategories.map(c => ({...c}));
+      done++;
+      barFill.style.width = "100%";
+    }
+
+    logEl.textContent = "";
+    msgEl.style.color = "var(--verde-oscuro)";
+    const doneParts = [];
+    if (prodCount) doneParts.push(`${prodCount} producto${prodCount===1?"":"s"}`);
+    if (catCount) doneParts.push(`${catCount} categoría${catCount===1?"":"s"}`);
+    msgEl.textContent = `Listo: se optimizaron ${doneParts.join(" y ")} ✅`;
+    toast("Fotos optimizadas ✅");
+    $("#startOptimizeBtn").hidden = true;
+    await loadProducts();
+    renderCategoryNav();
+  } catch (err) {
+    msgEl.style.color = "var(--rojo-oscuro)";
+    msgEl.textContent = err && err.message ? err.message : "Algo falló optimizando las fotos. Puedes volver a intentarlo — lo que ya se optimizó no se pierde.";
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+/* =====================================================================
    RENDER: catálogo de productos
    ===================================================================== */
 function currentList(){
@@ -1717,7 +1888,7 @@ function renderCard(p){
   el.innerHTML = `
     <div class="card-art" data-id="${p.id}">
       <button class="card-heart${isWishlisted(p.id) ? ' active' : ''}" data-id="${p.id}" aria-label="Favoritos">${isWishlisted(p.id) ? "❤️" : "🤍"}</button>
-      ${img ? `<img src="${img}" alt="${p.name}">` : `<span class="sin-foto">🧸</span>`}
+      ${img ? `<img src="${img}" alt="${p.name}" loading="lazy" decoding="async">` : `<span class="sin-foto">🧸</span>`}
       ${hasMultiplePhotos ? `
         <button type="button" class="card-nav-arrow prev" aria-label="Foto anterior">‹</button>
         <button type="button" class="card-nav-arrow next" aria-label="Foto siguiente">›</button>
@@ -2079,7 +2250,7 @@ function renderQvCarousel(){
   if (!qvImages.length){
     track.innerHTML = `<div class="qv-slide"><span class="sin-foto">🧸</span></div>`;
   } else {
-    track.innerHTML = qvImages.map(src => `<div class="qv-slide"><img src="${src}" alt=""></div>`).join("");
+    track.innerHTML = qvImages.map((src, i) => `<div class="qv-slide"><img src="${src}" alt="" ${i>0?'loading="lazy"':''} decoding="async"></div>`).join("");
   }
   const dots = $("#qvDots");
   dots.innerHTML = qvImages.length > 1
@@ -2296,6 +2467,9 @@ function openCropper(index){
   const src = pendingImages[index];
   const img = $("#cropImg");
   $("#cropMsg").textContent = "";
+  // si la foto ya está subida (un link, no un data:), hace falta pedirla
+  // "sin cookies" (crossOrigin) para poder recortarla de nuevo con canvas
+  img.crossOrigin = src.startsWith("data:") ? null : "anonymous";
   img.onload = () => resetCropBox();
   img.onerror = () => { $("#cropMsg").textContent = "No se pudo cargar esta foto para recortarla."; };
   img.src = src;
@@ -2516,14 +2690,22 @@ $("#productSaveBtn").addEventListener("click", async () => {
   if (WORKER_URL.includes("TU-WORKER")){ msgEl.textContent = "Falta configurar WORKER_URL en el código (ver worker.js)."; return; }
 
   msgEl.style.color = "var(--tinta-suave)";
-  msgEl.textContent = "Guardando…";
-
-  const product = {
-    id: editingProduct ? editingProduct.id : undefined,
-    name, price, stock, category, images: pendingImages,
-  };
+  const btn = $("#productSaveBtn");
+  btn.disabled = true;
 
   try {
+    // subir las fotos nuevas (las que ya eran links se dejan igual) antes
+    // de guardar el producto, para que el catálogo no cargue las fotos
+    // metidas adentro del producto — así carga rápido para todos.
+    msgEl.textContent = pendingImages.some(s => s.startsWith("data:")) ? "Subiendo fotos…" : "Guardando…";
+    const uploadedImages = await Promise.all(pendingImages.map(uploadImageIfNeeded));
+    msgEl.textContent = "Guardando…";
+
+    const product = {
+      id: editingProduct ? editingProduct.id : undefined,
+      name, price, stock, category, images: uploadedImages,
+    };
+
     const res = await fetch(`${WORKER_URL}/guardar-producto`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -2532,12 +2714,15 @@ $("#productSaveBtn").addEventListener("click", async () => {
     if (res.status === 401){ closeOverlay("productOverlay"); handleAuthError(); return; }
     const data = await res.json();
     if (!data.ok){ msgEl.style.color="var(--rojo-oscuro)"; msgEl.textContent = data.error || "No se pudo guardar."; return; }
+    pendingImages = uploadedImages;
     closeOverlay("productOverlay");
     toast(editingProduct ? "Producto actualizado ✅" : "Producto agregado ✅");
     await loadProducts();
   } catch (err) {
     msgEl.style.color="var(--rojo-oscuro)";
-    msgEl.textContent = "No se pudo conectar con el servidor. Revisa tu internet.";
+    msgEl.textContent = err && err.message ? err.message : "No se pudo conectar con el servidor. Revisa tu internet.";
+  } finally {
+    btn.disabled = false;
   }
 });
 
