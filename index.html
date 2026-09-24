@@ -174,7 +174,11 @@
   .cat-edit-hint{font-size:13px;color:var(--tinta-suave);font-weight:700;margin-top:4px;}
   .cat-edit-list{display:flex;flex-direction:column;gap:8px;margin-top:14px;}
   .cat-edit-row{display:flex;align-items:center;gap:8px;background:var(--blanco);border:2px solid var(--borde);border-radius:12px;padding:8px 10px;}
-  .cat-edit-emoji{font-size:19px;flex-shrink:0;width:26px;text-align:center;}
+  .cat-edit-emoji-input{
+    flex-shrink:0;width:38px;height:38px;padding:0;border-radius:9px;border:2px solid var(--borde);
+    font-size:18px;text-align:center;background:var(--crema);color:var(--tinta);
+  }
+  .cat-edit-emoji-input:focus{outline:none;border-color:var(--azul);}
   .cat-edit-input{
     flex:1;min-width:0;padding:9px 10px;border-radius:9px;border:2px solid var(--borde);
     font-family:inherit;font-size:13.5px;font-weight:700;color:var(--tinta);background:var(--crema);
@@ -669,7 +673,7 @@
     <div class="sheet" id="categoriesSheet">
       <button class="close-x" data-close="categoriesOverlay">✕</button>
       <h2>⚙️ Editar categorías</h2>
-      <div class="cat-edit-hint">Cambia el nombre que quieras y usa las flechas ▲▼ para acomodarlas en el orden que prefieras. Así se van a ver para todos los que visiten el catálogo.</div>
+      <div class="cat-edit-hint">Toca el ícono para cambiarlo (usa el emoji del teclado de tu celular), cambia el nombre que quieras, y usa las flechas ▲▼ para acomodarlas en el orden que prefieras. Así se van a ver para todos los que visiten el catálogo.</div>
       <div id="catEditList" class="cat-edit-list"></div>
       <div class="form-msg" id="categoriesMsg"></div>
       <div class="form-actions">
@@ -767,15 +771,15 @@ const DEFAULT_CATEGORIES = [
   { id: "bebe",      label: "Bebés y Primera Infancia",  emoji: "🍼" },
   { id: "otros",     label: "Otros Juguetes",            emoji: "🎁" },
 ];
-// copia "viva": el administrador puede cambiar el orden y los nombres desde
-// el sitio (se guarda en Cloudflare); el emoji y cuáles categorías existen
-// se siguen definiendo aquí arriba, en DEFAULT_CATEGORIES.
+// copia "viva": el administrador puede cambiar el orden, los nombres y el
+// ícono desde el sitio (se guarda en Cloudflare); cuáles categorías existen
+// se sigue definiendo aquí arriba, en DEFAULT_CATEGORIES.
 let CATEGORIES = DEFAULT_CATEGORIES.map(c => ({...c}));
 const catInfo = (id) => CATEGORIES.find(c => c.id === id) || CATEGORIES[CATEGORIES.length-1];
 
-/* trae de Cloudflare el orden/nombres guardados y arma la lista final,
-   conservando siempre el emoji y agregando al final cualquier categoría
-   nueva que exista en el código pero que aún no se haya guardado */
+/* trae de Cloudflare el orden/nombres/íconos guardados y arma la lista
+   final, agregando al final cualquier categoría nueva que exista en el
+   código pero que aún no se haya guardado */
 async function loadCategoryConfig(){
   if (WORKER_URL.includes("TU-WORKER")) return;
   try {
@@ -787,7 +791,11 @@ async function loadCategoryConfig(){
     DEFAULT_CATEGORIES.forEach(c => { byId[c.id] = c; });
     const merged = saved
       .filter(s => byId[s.id])
-      .map(s => ({ ...byId[s.id], label: (s.label && s.label.trim()) || byId[s.id].label }));
+      .map(s => ({
+        ...byId[s.id],
+        label: (s.label && s.label.trim()) || byId[s.id].label,
+        emoji: (s.emoji && s.emoji.trim()) || byId[s.id].emoji,
+      }));
     DEFAULT_CATEGORIES.forEach(c => { if (!merged.find(m => m.id === c.id)) merged.push({...c}); });
     CATEGORIES = merged;
   } catch (err) {
@@ -979,7 +987,7 @@ function renderCatEditList(){
   const wrap = $("#catEditList");
   wrap.innerHTML = workingCategories.map((c,i) => `
     <div class="cat-edit-row">
-      <span class="cat-edit-emoji">${c.emoji}</span>
+      <input type="text" class="cat-edit-emoji-input" data-i="${i}" value="${(c.emoji||"").replace(/"/g,"&quot;")}" maxlength="4" aria-label="Ícono">
       <input type="text" class="cat-edit-input" data-i="${i}" value="${(c.label||"").replace(/"/g,"&quot;")}" maxlength="40">
       <div class="cat-edit-arrows">
         <button type="button" class="cat-edit-up" data-i="${i}" ${i===0?"disabled":""} aria-label="Subir">▲</button>
@@ -987,6 +995,9 @@ function renderCatEditList(){
       </div>
     </div>
   `).join("");
+  wrap.querySelectorAll(".cat-edit-emoji-input").forEach(inp => inp.addEventListener("input", (e) => {
+    workingCategories[Number(e.target.dataset.i)].emoji = e.target.value;
+  }));
   wrap.querySelectorAll(".cat-edit-input").forEach(inp => inp.addEventListener("input", (e) => {
     workingCategories[Number(e.target.dataset.i)].label = e.target.value;
   }));
@@ -1015,6 +1026,11 @@ $("#categoriesSaveBtn").addEventListener("click", async () => {
     msgEl.textContent = "Ningún nombre puede quedar vacío.";
     return;
   }
+  if (workingCategories.some(c => !c.emoji.trim())){
+    msgEl.style.color = "var(--rojo-oscuro)";
+    msgEl.textContent = "Ningún ícono puede quedar vacío.";
+    return;
+  }
   msgEl.style.color = "var(--tinta-suave)";
   msgEl.textContent = "Guardando…";
   try {
@@ -1023,7 +1039,7 @@ $("#categoriesSaveBtn").addEventListener("click", async () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         password: getAdminPassword(),
-        categories: workingCategories.map(c => ({ id: c.id, label: c.label.trim() })),
+        categories: workingCategories.map(c => ({ id: c.id, label: c.label.trim(), emoji: c.emoji.trim() })),
       }),
     });
     if (res.status === 401){ closeOverlay("categoriesOverlay"); handleAuthError(); return; }
