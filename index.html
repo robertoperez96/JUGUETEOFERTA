@@ -148,18 +148,50 @@
 
   /* ---------- categorías ---------- */
   .cat-nav{position:sticky;top:76px;z-index:50;background:var(--crema);padding:12px 0;border-bottom:1px solid var(--borde);}
-  .cat-nav-inner{display:flex;gap:9px;overflow-x:auto;scrollbar-width:none;padding:0 18px;}
+  .cat-nav-row{display:flex;align-items:center;gap:8px;}
+  .cat-nav-scroll{position:relative;flex:1;min-width:0;}
+  .cat-nav-inner{display:flex;gap:9px;overflow-x:auto;scrollbar-width:none;padding:0 18px 0 0;}
   .cat-nav-inner::-webkit-scrollbar{display:none;}
+  /* sombra a los lados para avisar que hay más categorías si se desliza */
+  .cat-nav-scroll::before, .cat-nav-scroll::after{
+    content:"";position:absolute;top:0;bottom:0;width:22px;pointer-events:none;z-index:1;
+  }
+  .cat-nav-scroll::before{left:0;background:linear-gradient(90deg,var(--crema),rgba(253,247,231,0));}
+  .cat-nav-scroll::after{right:0;background:linear-gradient(270deg,var(--crema),rgba(253,247,231,0));}
   .cat-tab{
     flex-shrink:0;display:flex;align-items:center;gap:7px;padding:10px 16px;border-radius:999px;
     background:var(--blanco);border:2px solid var(--borde);color:var(--tinta-suave);
     font-weight:800;font-size:13.5px;white-space:nowrap;transition:all .15s;
   }
+  .cat-tab .cat-icon-emoji{font-size:17px;line-height:1;}
+  .cat-tab .cat-icon-img{width:19px;height:19px;border-radius:6px;object-fit:cover;flex-shrink:0;}
   .cat-tab.active{
     background:linear-gradient(135deg,var(--rojo),var(--amarillo-oscuro));
     border-color:transparent;color:#fff;box-shadow:0 6px 14px -6px rgba(244,68,46,.5);
   }
   .cat-tab:active{transform:scale(.96);}
+  .cat-nav-all-btn{
+    flex-shrink:0;margin-right:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+    width:52px;height:44px;border-radius:14px;border:2px solid var(--borde-fuerte);background:var(--blanco);
+    color:var(--tinta);font-weight:800;font-size:10px;
+  }
+  .cat-nav-all-btn .ic{font-size:17px;line-height:1;}
+  .cat-nav-all-btn:active{transform:scale(.93);}
+
+  /* ---------- modal: ver todas las categorías (grid) ---------- */
+  .cat-all-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;}
+  @media (max-width:420px){ .cat-all-grid{grid-template-columns:repeat(2,1fr);} }
+  .cat-all-card{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+    padding:16px 8px;border-radius:16px;border:2px solid var(--borde);background:var(--blanco);
+    text-align:center;
+  }
+  .cat-all-card.active{border-color:var(--rojo);background:rgba(244,68,46,.08);}
+  .cat-all-card .cat-icon-emoji{font-size:30px;line-height:1;}
+  .cat-all-card .cat-icon-img{width:40px;height:40px;border-radius:12px;object-fit:cover;}
+  .cat-all-card .lb{font-weight:800;font-size:12.5px;color:var(--tinta);line-height:1.2;}
+  .cat-all-card .ct{font-size:11px;font-weight:700;color:var(--tinta-suave);}
+  .cat-all-card:active{transform:scale(.96);}
 
   /* botón (solo administrador) para reordenar/renombrar categorías */
   .admin-tools-row{display:none;gap:8px;flex-wrap:wrap;margin:10px 0 0;}
@@ -175,11 +207,13 @@
   .cat-edit-hint{font-size:13px;color:var(--tinta-suave);font-weight:700;margin-top:4px;}
   .cat-edit-list{display:flex;flex-direction:column;gap:8px;margin-top:14px;}
   .cat-edit-row{display:flex;align-items:center;gap:8px;background:var(--blanco);border:2px solid var(--borde);border-radius:12px;padding:8px 10px;}
-  .cat-edit-emoji-input{
-    flex-shrink:0;width:38px;height:38px;padding:0;border-radius:9px;border:2px solid var(--borde);
-    font-size:18px;text-align:center;background:var(--crema);color:var(--tinta);
+  .cat-icon-btn{
+    flex-shrink:0;width:40px;height:40px;padding:0;border-radius:10px;border:2px solid var(--borde);
+    font-size:19px;display:flex;align-items:center;justify-content:center;overflow:hidden;
+    background:var(--crema);color:var(--tinta);
   }
-  .cat-edit-emoji-input:focus{outline:none;border-color:var(--azul);}
+  .cat-icon-btn img{width:100%;height:100%;object-fit:cover;}
+  .cat-icon-btn:active{transform:scale(.92);}
   .cat-edit-input{
     flex:1;min-width:0;padding:9px 10px;border-radius:9px;border:2px solid var(--borde);
     font-family:inherit;font-size:13.5px;font-weight:700;color:var(--tinta);background:var(--crema);
@@ -192,6 +226,60 @@
   }
   .cat-edit-arrows button:disabled{opacity:.3;}
   .cat-edit-arrows button:active:not(:disabled){transform:scale(.9);}
+  .cat-edit-rm{
+    flex-shrink:0;width:30px;height:30px;border-radius:8px;border:2px solid rgba(244,68,46,.3);
+    background:rgba(244,68,46,.08);color:var(--rojo-oscuro);font-size:13px;font-weight:800;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .cat-edit-rm:active{transform:scale(.9);}
+  .cat-edit-add-btn{
+    display:flex;align-items:center;justify-content:center;gap:6px;width:100%;margin-top:4px;
+    padding:11px;border-radius:12px;border:2px dashed var(--borde-fuerte);background:var(--blanco);
+    color:var(--tinta-suave);font-weight:800;font-size:13.5px;
+  }
+  .cat-edit-add-btn:active{transform:scale(.98);}
+
+  /* ---------- modal: elegir ícono de categoría (emoji o imagen) ---------- */
+  .icon-tabs{display:flex;gap:8px;margin-top:14px;}
+  .icon-tab-btn{
+    flex:1;padding:10px;border-radius:12px;border:2px solid var(--borde);background:var(--blanco);
+    color:var(--tinta-suave);font-weight:800;font-size:13.5px;
+  }
+  .icon-tab-btn.active{border-color:var(--azul);background:rgba(46,168,224,.12);color:var(--azul-oscuro);}
+  .icon-tab-btn:active{transform:scale(.97);}
+  .emoji-search-input{
+    width:100%;margin-top:12px;padding:11px 14px;border-radius:12px;border:2px solid var(--borde);
+    font-family:inherit;font-size:14px;font-weight:700;color:var(--tinta);background:var(--crema);
+  }
+  .emoji-search-input:focus{outline:none;border-color:var(--azul);}
+  .emoji-groups{max-height:44vh;overflow-y:auto;margin-top:12px;}
+  .emoji-group-title{font-weight:800;font-size:12px;color:var(--tinta-suave);margin:14px 2px 6px;text-transform:uppercase;letter-spacing:.03em;}
+  .emoji-group-title:first-child{margin-top:0;}
+  .emoji-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(42px,1fr));gap:4px;}
+  .emoji-btn{
+    width:100%;aspect-ratio:1/1;border:none;border-radius:9px;background:var(--crema);font-size:21px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .emoji-btn:active{transform:scale(.88);background:rgba(46,168,224,.18);}
+  .icon-image-panel{margin-top:14px;}
+  .icon-image-preview{
+    width:88px;height:88px;border-radius:16px;overflow:hidden;background:var(--crema);
+    border:2px dashed var(--borde-fuerte);display:flex;align-items:center;justify-content:center;
+    margin:0 auto 14px;font-size:34px;opacity:.5;
+  }
+  .icon-image-preview img{width:100%;height:100%;object-fit:cover;}
+  .icon-image-actions{display:flex;flex-direction:column;gap:10px;}
+  .icon-upload-btn{
+    display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border-radius:12px;
+    border:2px dashed var(--borde-fuerte);background:var(--blanco);color:var(--tinta);font-weight:800;font-size:13.5px;
+  }
+  .icon-upload-btn:active{transform:scale(.98);}
+  .icon-remove-btn{
+    display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;border-radius:12px;
+    border:2px solid rgba(244,68,46,.3);background:rgba(244,68,46,.08);color:var(--rojo-oscuro);font-weight:800;font-size:12.5px;
+  }
+  .icon-remove-btn:active{transform:scale(.97);}
+  .icon-image-hint{font-size:12px;color:var(--tinta-suave);font-weight:700;margin-top:2px;text-align:center;}
 
   /* ---------- modal: respaldos automáticos ---------- */
   .backup-hint{font-size:13px;color:var(--tinta-suave);font-weight:700;margin-top:4px;}
@@ -204,11 +292,20 @@
   .backup-row-info{display:flex;flex-direction:column;gap:2px;min-width:0;}
   .backup-row-date{font-weight:800;font-size:13.5px;color:var(--tinta);}
   .backup-row-count{font-size:12px;color:var(--tinta-suave);font-weight:700;}
-  .backup-restore-btn{
+  .backup-row-btns{display:flex;gap:6px;flex-shrink:0;}
+  .backup-restore-btn, .backup-download-btn{
     flex-shrink:0;padding:8px 12px;border-radius:9px;border:2px solid var(--azul);
     background:rgba(46,168,224,.12);color:var(--azul-oscuro);font-weight:800;font-size:12.5px;
   }
-  .backup-restore-btn:active{transform:scale(.95);}
+  .backup-download-btn{border-color:var(--verde-oscuro);background:rgba(52,168,83,.12);color:var(--verde-oscuro);}
+  .backup-restore-btn:active, .backup-download-btn:active{transform:scale(.95);}
+  .backup-create-btn{
+    display:flex;align-items:center;justify-content:center;gap:7px;width:100%;margin-top:12px;
+    padding:12px;border-radius:12px;border:none;background:var(--verde);color:#0b3d21;
+    font-weight:800;font-size:13.5px;
+  }
+  .backup-create-btn:active{transform:scale(.98);}
+  .backup-create-btn:disabled{opacity:.6;}
 
   /* ---------- catálogo ---------- */
   main{padding:22px 0 40px;}
@@ -252,6 +349,7 @@
     align-self:flex-start;display:inline-flex;align-items:center;gap:4px;background:rgba(46,168,224,.12);
     color:var(--azul-oscuro);font-size:10.5px;font-weight:800;padding:3px 8px;border-radius:999px;margin-bottom:2px;
   }
+  .card-cat-pill .cat-icon-img{width:12px;height:12px;border-radius:3px;object-fit:cover;}
   .card-name{font-family:var(--fuente-titulo);font-weight:600;font-size:14.5px;line-height:1.22;
     display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
   .card-price-row{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-top:2px;}
@@ -375,6 +473,7 @@
     background:var(--blanco);font-weight:800;font-size:13px;color:var(--tinta-suave);
   }
   .cat-pick.sel{border-color:var(--azul);background:rgba(46,168,224,.10);color:var(--azul-oscuro);}
+  .cat-pick .cat-icon-img{width:16px;height:16px;border-radius:4px;object-fit:cover;flex-shrink:0;}
 
   .form-actions{display:flex;gap:10px;margin-top:22px;}
   .btn{border:none;border-radius:999px;padding:14px 18px;font-weight:800;font-size:15px;flex:1;display:flex;align-items:center;justify-content:center;gap:8px;}
@@ -404,7 +503,8 @@
   .pedido-item img{width:56px;height:56px;border-radius:10px;object-fit:cover;background:var(--borde);flex-shrink:0;}
   .pedido-item-info{flex:1;min-width:130px;}
   .pedido-item-info .n{font-weight:800;font-size:14px;}
-  .pedido-item-info .cat{font-size:11px;color:var(--tinta-suave);font-weight:700;margin:1px 0;}
+  .pedido-item-info .cat{font-size:11px;color:var(--tinta-suave);font-weight:700;margin:1px 0;display:flex;align-items:center;gap:4px;}
+  .pedido-item-info .cat .cat-icon-img{width:13px;height:13px;border-radius:4px;object-fit:cover;}
   .pedido-item-info .p{font-size:12.5px;color:var(--tinta-suave);font-weight:700;}
   .pedido-item-missing .pedido-item-info .n{color:var(--tinta-suave);font-style:italic;font-weight:700;}
   .pedido-sold-btn{
@@ -448,7 +548,8 @@
   .qv-dots .dot{width:7px;height:7px;border-radius:999px;background:rgba(255,255,255,.7);border:1px solid rgba(35,41,70,.25);}
   .qv-dots .dot.active{background:var(--rojo);border-color:var(--rojo);}
   .qv-info{padding:16px 2px 0;}
-  .qv-cat-badge{position:static;display:inline-flex;background:rgba(46,168,224,.12);color:var(--azul-oscuro);box-shadow:none;}
+  .qv-cat-badge{position:static;display:inline-flex;align-items:center;gap:4px;background:rgba(46,168,224,.12);color:var(--azul-oscuro);box-shadow:none;}
+  .qv-cat-badge .cat-icon-img{width:13px;height:13px;border-radius:4px;object-fit:cover;}
   .qv-secondary-row{display:flex;gap:10px;margin-top:12px;}
   .qv-secondary-btn{
     flex:1;background:var(--blanco);border:2px solid var(--borde);border-radius:999px;
@@ -500,7 +601,9 @@
     .cat-nav{padding:14px 0;box-shadow:0 3px 10px -6px rgba(35,41,70,.2);}
     .cat-nav-inner{gap:10px;}
     .cat-tab{padding:12px 18px;font-size:14.5px;border-width:2px;}
-    .cat-tab span{font-size:16px;}
+    .cat-tab span{font-size:20px;}
+    .cat-nav-all-btn{width:46px;height:40px;margin-right:12px;}
+    .cat-nav-all-btn .ic{font-size:19px;}
 
     .view-toggle{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:4px 2px 14px;}
     .view-toggle-label{font-size:12.5px;font-weight:800;color:var(--tinta-suave);margin-right:2px;}
@@ -575,7 +678,14 @@
 </section>
 
 <nav class="cat-nav">
-  <div class="wrap cat-nav-inner" id="catNav"></div>
+  <div class="wrap cat-nav-row">
+    <button type="button" class="cat-nav-all-btn" id="catNavAllBtn" aria-label="Ver todas las categorías">
+      <span class="ic">🗂️</span><span>Ver todas</span>
+    </button>
+    <div class="cat-nav-scroll">
+      <div class="cat-nav-inner" id="catNav"></div>
+    </div>
+  </div>
 </nav>
 <div class="wrap admin-tools-row">
   <button type="button" id="editCategoriesBtn" class="admin-tool-btn">⚙️ Editar categorías</button>
@@ -715,18 +825,67 @@
   </div>
 </div>
 
+<!-- ============== overlay: ver todas las categorías (grid) ============== -->
+<div id="catAllOverlay" class="overlay">
+  <div class="sheet-wrap">
+    <div class="sheet" id="catAllSheet">
+      <button class="close-x" data-close="catAllOverlay">✕</button>
+      <h2>🗂️ Categorías</h2>
+      <div class="cat-edit-hint">Toca una categoría para ir directo a ella.</div>
+      <div id="catAllGrid" class="cat-all-grid"></div>
+    </div>
+  </div>
+</div>
+
 <!-- ============== overlay: editar categorías (solo administrador) ============== -->
 <div id="categoriesOverlay" class="overlay">
   <div class="sheet-wrap">
     <div class="sheet" id="categoriesSheet">
       <button class="close-x" data-close="categoriesOverlay">✕</button>
       <h2>⚙️ Editar categorías</h2>
-      <div class="cat-edit-hint">Toca el ícono para cambiarlo (usa el emoji del teclado de tu celular), cambia el nombre que quieras, y usa las flechas ▲▼ para acomodarlas en el orden que prefieras. Así se van a ver para todos los que visiten el catálogo.</div>
+      <div class="cat-edit-hint">Toca el cuadrito del ícono para elegir un emoji de la lista o poner una imagen, cambia el nombre que quieras, y usa las flechas ▲▼ para acomodarlas en el orden que prefieras. Así se van a ver para todos los que visiten el catálogo.</div>
       <div id="catEditList" class="cat-edit-list"></div>
       <div class="form-msg" id="categoriesMsg"></div>
       <div class="form-actions">
         <button class="btn btn-secondary" data-close="categoriesOverlay">Cancelar</button>
         <button class="btn btn-primary" id="categoriesSaveBtn">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============== overlay: elegir ícono de categoría (emoji o imagen) ============== -->
+<div id="catIconOverlay" class="overlay">
+  <div class="sheet-wrap">
+    <div class="sheet" id="catIconSheet">
+      <button class="close-x" data-close="catIconOverlay">✕</button>
+      <h2>🎨 Ícono de la categoría</h2>
+      <div class="icon-tabs">
+        <button type="button" class="icon-tab-btn" id="iconTabEmojiBtn">😊 Emoji</button>
+        <button type="button" class="icon-tab-btn" id="iconTabImageBtn">🖼️ Imagen</button>
+      </div>
+
+      <div id="iconEmojiPanel">
+        <input type="text" id="emojiSearchInput" class="emoji-search-input" placeholder="Busca un emoji… ej. perro, carro, corazón">
+        <div id="emojiGroups" class="emoji-groups"></div>
+      </div>
+
+      <div id="iconImagePanel" class="icon-image-panel" hidden>
+        <div class="icon-image-preview" id="iconImagePreview"><span class="sin-foto">🖼️</span></div>
+        <div class="icon-image-actions">
+          <button type="button" class="icon-upload-btn" id="iconImageUploadBtn">📷 Subir foto (celular o computadora)</button>
+          <input type="file" id="iconImageInput" accept="image/*" hidden>
+          <div class="url-paste-row">
+            <input type="text" id="iconImageUrlInput" placeholder="O pega aquí el link de una imagen…">
+            <button type="button" id="iconImageUrlBtn">Agregar</button>
+          </div>
+          <button type="button" class="icon-remove-btn" id="removeIconImageBtn" hidden>🗑️ Quitar imagen y volver al emoji</button>
+        </div>
+        <div class="icon-image-hint">La imagen se recorta sola al centro y se hace cuadrada para verse bien en todos lados.</div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-primary" id="iconPickerDoneBtn">Listo</button>
       </div>
     </div>
   </div>
@@ -738,7 +897,8 @@
     <div class="sheet" id="backupsSheet">
       <button class="close-x" data-close="backupsOverlay">✕</button>
       <h2>🗄️ Respaldos</h2>
-      <div class="backup-hint">Cada cierto tiempo el sitio guarda una copia de seguridad de todos los productos, por si alguien los borra sin querer. "Restaurar" solo recupera los productos que ya no están — no toca ni borra nada de lo que sigue en el catálogo.</div>
+      <div class="backup-hint">Cada cierto tiempo el sitio guarda una copia de seguridad de todos los productos, por si alguien los borra sin querer. "Restaurar" solo recupera los productos que ya no están — no toca ni borra nada de lo que sigue en el catálogo. "Descargar" guarda el respaldo como archivo en tu celular o computadora, para más seguridad.</div>
+      <button type="button" class="backup-create-btn" id="createBackupBtn">🗄️ Crear respaldo ahora</button>
       <div id="backupList" class="backup-list"></div>
       <div class="form-msg" id="backupsMsg"></div>
       <div class="form-actions">
@@ -849,13 +1009,13 @@ const WHATSAPP_PHONE = "529931762263"; // WhatsApp del negocio, formato: 52 + 10
 const SITE_URL = "https://jugueteoferta.netlify.app/";
 
 const DEFAULT_CATEGORIES = [
-  { id: "munecas",   label: "Muñecas y Peluches",       emoji: "🧸" },
-  { id: "vehiculos", label: "Vehículos y Pistas",        emoji: "🚗" },
-  { id: "bloques",   label: "Bloques y Construcción",    emoji: "🧱" },
-  { id: "figuras",   label: "Figuras de Acción",         emoji: "🦸" },
-  { id: "mesa",      label: "Juegos de Mesa",            emoji: "🎲" },
-  { id: "bebe",      label: "Bebés y Primera Infancia",  emoji: "🍼" },
-  { id: "otros",     label: "Otros Juguetes",            emoji: "🎁" },
+  { id: "munecas",   label: "Muñecas y Peluches",       emoji: "🧸", image: null },
+  { id: "vehiculos", label: "Vehículos y Pistas",        emoji: "🚗", image: null },
+  { id: "bloques",   label: "Bloques y Construcción",    emoji: "🧱", image: null },
+  { id: "figuras",   label: "Figuras de Acción",         emoji: "🦸", image: null },
+  { id: "mesa",      label: "Juegos de Mesa",            emoji: "🎲", image: null },
+  { id: "bebe",      label: "Bebés y Primera Infancia",  emoji: "🍼", image: null },
+  { id: "otros",     label: "Otros Juguetes",            emoji: "🎁", image: null },
 ];
 // copia "viva": el administrador puede cambiar el orden, los nombres y el
 // ícono desde el sitio (se guarda en Cloudflare); cuáles categorías existen
@@ -863,9 +1023,22 @@ const DEFAULT_CATEGORIES = [
 let CATEGORIES = DEFAULT_CATEGORIES.map(c => ({...c}));
 const catInfo = (id) => CATEGORIES.find(c => c.id === id) || CATEGORIES[CATEGORIES.length-1];
 
+/* ícono de una categoría: si tiene imagen la usa, si no cae al emoji.
+   Se usa en todos lados donde se muestra una categoría (barra, cuadrícula,
+   tarjetas, carrito, resumen de pedido, editor de producto, etc.) */
+function catIconHTML(cat, extraClass){
+  const cls = extraClass ? " " + extraClass : "";
+  if (cat && cat.image){
+    return `<img src="${cat.image}" alt="" class="cat-icon-img${cls}">`;
+  }
+  return `<span class="cat-icon-emoji${cls}">${(cat && cat.emoji) || "🎁"}</span>`;
+}
+
 /* trae de Cloudflare el orden/nombres/íconos guardados y arma la lista
    final, agregando al final cualquier categoría nueva que exista en el
-   código pero que aún no se haya guardado */
+   código pero que aún no se haya guardado. También conserva categorías
+   nuevas que el administrador haya creado con el botón "Añadir categoría
+   nueva" (esas no están en DEFAULT_CATEGORIES, solo viven en Cloudflare). */
 async function loadCategoryConfig(){
   if (WORKER_URL.includes("TU-WORKER")) return;
   try {
@@ -875,13 +1048,15 @@ async function loadCategoryConfig(){
     if (!saved.length) return;
     const byId = {};
     DEFAULT_CATEGORIES.forEach(c => { byId[c.id] = c; });
-    const merged = saved
-      .filter(s => byId[s.id])
-      .map(s => ({
-        ...byId[s.id],
-        label: (s.label && s.label.trim()) || byId[s.id].label,
-        emoji: (s.emoji && s.emoji.trim()) || byId[s.id].emoji,
-      }));
+    const merged = saved.map(s => {
+      const base = byId[s.id] || { id: s.id, label: "", emoji: "✨", image: null };
+      return {
+        ...base,
+        label: (s.label && s.label.trim()) || base.label,
+        emoji: (s.emoji && s.emoji.trim()) || base.emoji,
+        image: s.image || null,
+      };
+    });
     DEFAULT_CATEGORIES.forEach(c => { if (!merged.find(m => m.id === c.id)) merged.push({...c}); });
     CATEGORIES = merged;
   } catch (err) {
@@ -1050,7 +1225,7 @@ function renderCategoryNav(){
   const tabs = [{ id:"todos", label:"Todos", emoji:"🎉" }, ...CATEGORIES];
   nav.innerHTML = tabs.map(c => `
     <button class="cat-tab ${activeCat===c.id?'active':''}" data-cat="${c.id}">
-      <span>${c.emoji}</span> ${c.label}${c.id!=="todos" && counts[c.id] ? ` (${counts[c.id]})` : ""}
+      ${catIconHTML(c)} ${c.label}${c.id!=="todos" && counts[c.id] ? ` (${counts[c.id]})` : ""}
     </button>
   `).join("");
   $$(".cat-tab").forEach(btn => btn.addEventListener("click", () => {
@@ -1058,7 +1233,35 @@ function renderCategoryNav(){
     renderCategoryNav();
     render();
   }));
+  const activeBtn = nav.querySelector(".cat-tab.active");
+  if (activeBtn) activeBtn.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
 }
+
+/* =====================================================================
+   VER TODAS LAS CATEGORÍAS — cuadrícula (para que ninguna se pierda,
+   sobre todo en el celular donde la barra deslizable no las muestra todas)
+   ===================================================================== */
+function openCatAllGrid(){
+  const grid = $("#catAllGrid");
+  const counts = {};
+  products.forEach(p => { counts[p.category] = (counts[p.category]||0) + 1; });
+  const tabs = [{ id:"todos", label:"Todos", emoji:"🎉" }, ...CATEGORIES];
+  grid.innerHTML = tabs.map(c => `
+    <button type="button" class="cat-all-card ${activeCat===c.id?'active':''}" data-cat="${c.id}">
+      ${catIconHTML(c)}
+      <span class="lb">${c.label}</span>
+      <span class="ct">${c.id==="todos" ? (products.length+" en total") : `${counts[c.id]||0} producto${(counts[c.id]||0)===1?"":"s"}`}</span>
+    </button>
+  `).join("");
+  grid.querySelectorAll(".cat-all-card").forEach(btn => btn.addEventListener("click", () => {
+    activeCat = btn.dataset.cat;
+    renderCategoryNav();
+    render();
+    closeOverlay("catAllOverlay");
+  }));
+  openOverlay("catAllOverlay");
+}
+$("#catNavAllBtn").addEventListener("click", openCatAllGrid);
 
 /* =====================================================================
    EDITAR CATEGORÍAS (orden y nombres) — solo administrador
@@ -1076,16 +1279,17 @@ function renderCatEditList(){
   const wrap = $("#catEditList");
   wrap.innerHTML = workingCategories.map((c,i) => `
     <div class="cat-edit-row">
-      <input type="text" class="cat-edit-emoji-input" data-i="${i}" value="${(c.emoji||"").replace(/"/g,"&quot;")}" maxlength="4" aria-label="Ícono">
-      <input type="text" class="cat-edit-input" data-i="${i}" value="${(c.label||"").replace(/"/g,"&quot;")}" maxlength="40">
+      <button type="button" class="cat-icon-btn" data-i="${i}" aria-label="Cambiar ícono">${catIconHTML(c)}</button>
+      <input type="text" class="cat-edit-input" data-i="${i}" value="${(c.label||"").replace(/"/g,"&quot;")}" maxlength="40" placeholder="Nombre de la categoría">
       <div class="cat-edit-arrows">
         <button type="button" class="cat-edit-up" data-i="${i}" ${i===0?"disabled":""} aria-label="Subir">▲</button>
         <button type="button" class="cat-edit-down" data-i="${i}" ${i===workingCategories.length-1?"disabled":""} aria-label="Bajar">▼</button>
       </div>
+      <button type="button" class="cat-edit-rm" data-i="${i}" aria-label="Quitar categoría">🗑️</button>
     </div>
-  `).join("");
-  wrap.querySelectorAll(".cat-edit-emoji-input").forEach(inp => inp.addEventListener("input", (e) => {
-    workingCategories[Number(e.target.dataset.i)].emoji = e.target.value;
+  `).join("") + `<button type="button" class="cat-edit-add-btn" id="catEditAddBtn">➕ Añadir categoría nueva</button>`;
+  wrap.querySelectorAll(".cat-icon-btn").forEach(btn => btn.addEventListener("click", () => {
+    openIconPicker(Number(btn.dataset.i));
   }));
   wrap.querySelectorAll(".cat-edit-input").forEach(inp => inp.addEventListener("input", (e) => {
     workingCategories[Number(e.target.dataset.i)].label = e.target.value;
@@ -1104,6 +1308,20 @@ function renderCatEditList(){
       renderCatEditList();
     }
   }));
+  wrap.querySelectorAll(".cat-edit-rm").forEach(btn => btn.addEventListener("click", () => {
+    const i = Number(btn.dataset.i);
+    if (!confirm("¿Quitar esta categoría? Los productos que ya la tengan asignada no se borran, solo dejarán de verse agrupados bajo este nombre.")) return;
+    workingCategories.splice(i, 1);
+    renderCatEditList();
+  }));
+  $("#catEditAddBtn").addEventListener("click", () => {
+    const id = "cat_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    workingCategories.push({ id, label: "", emoji: "✨", image: null });
+    renderCatEditList();
+    const inputs = wrap.querySelectorAll(".cat-edit-input");
+    const last = inputs[inputs.length - 1];
+    if (last) last.focus();
+  });
 }
 
 $("#editCategoriesBtn").addEventListener("click", openCategoriesEditor);
@@ -1115,7 +1333,7 @@ $("#categoriesSaveBtn").addEventListener("click", async () => {
     msgEl.textContent = "Ningún nombre puede quedar vacío.";
     return;
   }
-  if (workingCategories.some(c => !c.emoji.trim())){
+  if (workingCategories.some(c => !(c.emoji||"").trim() && !c.image)){
     msgEl.style.color = "var(--rojo-oscuro)";
     msgEl.textContent = "Ningún ícono puede quedar vacío.";
     return;
@@ -1128,7 +1346,7 @@ $("#categoriesSaveBtn").addEventListener("click", async () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         password: getAdminPassword(),
-        categories: workingCategories.map(c => ({ id: c.id, label: c.label.trim(), emoji: c.emoji.trim() })),
+        categories: workingCategories.map(c => ({ id: c.id, label: c.label.trim(), emoji: (c.emoji||"").trim() || "🎁", image: c.image || null })),
       }),
     });
     if (res.status === 401){ closeOverlay("categoriesOverlay"); handleAuthError(); return; }
@@ -1146,6 +1364,187 @@ $("#categoriesSaveBtn").addEventListener("click", async () => {
 });
 
 /* =====================================================================
+   ÍCONO DE CATEGORÍA — elegir emoji de una lista amplia (con buscador) o
+   poner una imagen (subida, pegada del portapapeles, o por link). Se
+   agregó porque en computadora no siempre se puede escribir un emoji
+   directo con el teclado.
+   ===================================================================== */
+const EMOJI_PICKER_DATA = [
+  { g: "Juguetes y diversión", items: [
+    ["🧸","oso peluche muñeco"], ["🪀","yoyo"], ["🪁","papalote cometa"], ["🎈","globo"], ["🪅","piñata"],
+    ["🧩","rompecabezas"], ["🎯","diana dardos"], ["🎳","boliche"], ["🎲","dados juego mesa"], ["🎮","videojuego control"],
+    ["🕹️","joystick"], ["🛹","patineta"], ["🛼","patines"], ["🎨","pintura arte"], ["🖍️","crayon"],
+    ["✏️","lapiz"], ["📚","libros cuentos"], ["🔮","bola magica"], ["🪄","varita magica"], ["🎠","carrusel"],
+    ["🎡","rueda de la fortuna"], ["🎢","montaña rusa"], ["🩰","ballet"], ["🥁","tambor"], ["🎷","saxofon"],
+    ["🎺","trompeta"], ["🎸","guitarra"], ["🪕","banjo"], ["🎻","violin"], ["🎤","microfono karaoke"],
+    ["🎧","audifonos"], ["🃏","carta comodin"], ["🀄","mahjong"], ["♟️","ajedrez"], ["🪆","matrioska muñeca rusa"],
+  ]},
+  { g: "Personajes y fantasía", items: [
+    ["🧚","hada"], ["🧜‍♀️","sirena"], ["🧞","genio"], ["🦸","superheroe"], ["🦸‍♀️","superheroina"],
+    ["🦹","villano"], ["🧙","mago brujo"], ["🤴","principe"], ["👸","princesa"], ["🤖","robot"],
+    ["👽","alien extraterrestre"], ["👻","fantasma"], ["💀","calavera"], ["🎭","teatro mascaras"], ["🐉","dragon"],
+    ["🦄","unicornio"], ["🧛","vampiro"], ["🧟","zombie"], ["🥷","ninja"], ["👑","corona"],
+  ]},
+  { g: "Caritas", items: [
+    ["😀","feliz"], ["😃","contento"], ["😄","alegre"], ["😁","sonrisa"], ["🤣","risa"],
+    ["😂","llorando de risa"], ["🙂","sonrisa leve"], ["😉","guiño"], ["😊","tierno"], ["😇","angel"],
+    ["🥰","enamorado cariño"], ["😍","ojos de corazon"], ["🤩","estrellado sorprendido"], ["😘","beso"], ["😋","rico sabroso"],
+    ["😜","guiño lengua"], ["🤪","loco"], ["🤗","abrazo"], ["🤔","pensando duda"], ["😴","dormido"],
+    ["😎","lentes cool"], ["🥳","fiesta cumpleaños"], ["🧐","curioso"], ["😢","triste llorando"], ["😡","enojado"],
+    ["🤡","payaso"], ["💯","cien puntos"],
+  ]},
+  { g: "Animales", items: [
+    ["🐶","perro"], ["🐱","gato"], ["🐭","raton"], ["🐹","hamster"], ["🐰","conejo"],
+    ["🦊","zorro"], ["🐻","oso"], ["🐼","panda"], ["🐨","koala"], ["🐯","tigre"],
+    ["🦁","leon"], ["🐮","vaca"], ["🐷","cerdo puerco"], ["🐸","rana"], ["🐵","mono"],
+    ["🐔","gallina pollo"], ["🐧","pinguino"], ["🐦","pajaro"], ["🦉","buho"], ["🐺","lobo"],
+    ["🐴","caballo"], ["🐝","abeja"], ["🦋","mariposa"], ["🐢","tortuga"], ["🐍","serpiente"],
+    ["🦖","dinosaurio"], ["🐙","pulpo"], ["🐬","delfin"], ["🐳","ballena"], ["🐠","pez"],
+    ["🦈","tiburon"], ["🐊","cocodrilo"], ["🦓","cebra"], ["🐘","elefante"], ["🦒","jirafa"],
+    ["🐫","camello"], ["🦘","canguro"], ["🦔","erizo"], ["🐿️","ardilla"],
+  ]},
+  { g: "Comida", items: [
+    ["🍎","manzana"], ["🍊","naranja"], ["🍋","limon"], ["🍌","platano"], ["🍉","sandia"],
+    ["🍇","uvas"], ["🍓","fresa"], ["🍒","cerezas"], ["🍍","piña"], ["🥭","mango"],
+    ["🍅","tomate"], ["🥕","zanahoria"], ["🌽","maiz"], ["🍞","pan"], ["🧀","queso"],
+    ["🍗","pollo"], ["🍔","hamburguesa"], ["🍟","papas fritas"], ["🍕","pizza"], ["🌭","hot dog"],
+    ["🌮","taco"], ["🍿","palomitas"], ["🍩","dona"], ["🍪","galleta"], ["🎂","pastel"],
+    ["🧁","cupcake"], ["🍫","chocolate"], ["🍬","dulce"], ["🍭","paleta"], ["🍦","helado"],
+    ["🍼","biberon"],
+  ]},
+  { g: "Deportes y actividades", items: [
+    ["⚽","futbol"], ["🏀","basquetbol"], ["🏈","futbol americano"], ["⚾","beisbol"], ["🎾","tenis"],
+    ["🏐","voleibol"], ["🎱","billar"], ["🏓","ping pong"], ["🏸","badminton"], ["🥅","porteria"],
+    ["🏹","arco flecha"], ["🎣","pesca"], ["🥊","box"], ["⛸️","patinaje hielo"], ["🎿","esqui"],
+    ["🛷","trineo"], ["🏂","snowboard"], ["🏄","surf"], ["🚴","bicicleta deporte"], ["🏆","trofeo"],
+    ["🥇","medalla oro"], ["🤸","gimnasia"],
+  ]},
+  { g: "Vehículos y viajes", items: [
+    ["🚗","carro"], ["🚕","taxi"], ["🚙","camioneta"], ["🚌","autobus"], ["🏎️","carreras"],
+    ["🚓","policia"], ["🚑","ambulancia"], ["🚒","bomberos"], ["🚚","camion"], ["🚜","tractor"],
+    ["🛵","moto scooter"], ["🏍️","motocicleta"], ["🚲","bicicleta"], ["🛴","patineta scooter"], ["🚂","tren"],
+    ["🚀","cohete"], ["🛸","platillo volador"], ["✈️","avion"], ["🚁","helicoptero"], ["⛵","velero barco"],
+    ["🚢","barco"], ["⚓","ancla"],
+  ]},
+  { g: "Naturaleza y clima", items: [
+    ["🌈","arcoiris"], ["⭐","estrella"], ["🌟","estrella brillante"], ["✨","brillos"], ["☀️","sol"],
+    ["☁️","nube"], ["⛈️","tormenta"], ["❄️","nieve"], ["⛄","muñeco de nieve"], ["🔥","fuego"],
+    ["🌊","ola mar"], ["🌙","luna"], ["🌸","flor"], ["🌻","girasol"], ["🌹","rosa"],
+    ["🍀","trebol"], ["🌵","cactus"], ["🌴","palmera"], ["🍄","hongo"],
+  ]},
+  { g: "Corazones y celebración", items: [
+    ["❤️","corazon rojo"], ["🧡","corazon naranja"], ["💛","corazon amarillo"], ["💚","corazon verde"], ["💙","corazon azul"],
+    ["💜","corazon morado"], ["🖤","corazon negro"], ["🤍","corazon blanco"], ["💕","corazones"], ["💖","corazon brillante"],
+    ["💝","regalo corazon"], ["🎉","confeti fiesta"], ["🎊","confeti"], ["🎁","regalo"], ["🎀","moño liston"],
+    ["🏅","medalla"],
+  ]},
+  { g: "Objetos y símbolos", items: [
+    ["💎","diamante"], ["🔑","llave"], ["⏰","reloj"], ["💡","foco idea"], ["🔔","campana"],
+    ["📷","camara foto"], ["🎵","nota musical"], ["🏷️","etiqueta precio"], ["💰","dinero"], ["🛍️","bolsas compras"],
+    ["🎓","graduacion"], ["🧳","maleta"], ["👕","ropa"], ["👟","tenis zapato"], ["🎒","mochila"],
+    ["⚡","rayo"], ["❗","exclamacion"], ["❓","pregunta"],
+  ]},
+];
+
+let iconEditIndex = null;
+let iconPickerTab = "emoji"; // "emoji" | "imagen"
+
+function openIconPicker(i){
+  iconEditIndex = i;
+  iconPickerTab = "emoji";
+  $("#emojiSearchInput").value = "";
+  renderIconPickerTabs();
+  renderEmojiGrid("");
+  renderIconImagePanel();
+  openOverlay("catIconOverlay");
+}
+
+function renderIconPickerTabs(){
+  $("#iconTabEmojiBtn").classList.toggle("active", iconPickerTab === "emoji");
+  $("#iconTabImageBtn").classList.toggle("active", iconPickerTab === "imagen");
+  $("#iconEmojiPanel").hidden = iconPickerTab !== "emoji";
+  $("#iconImagePanel").hidden = iconPickerTab !== "imagen";
+}
+$("#iconTabEmojiBtn").addEventListener("click", () => { iconPickerTab = "emoji"; renderIconPickerTabs(); });
+$("#iconTabImageBtn").addEventListener("click", () => { iconPickerTab = "imagen"; renderIconPickerTabs(); renderIconImagePanel(); });
+
+function renderEmojiGrid(query){
+  const wrap = $("#emojiGroups");
+  const q = query.trim().toLowerCase();
+  let html = "";
+  EMOJI_PICKER_DATA.forEach(group => {
+    const items = q ? group.items.filter(([e,k]) => k.includes(q)) : group.items;
+    if (!items.length) return;
+    html += `<div class="emoji-group-title">${group.g}</div><div class="emoji-grid">`;
+    items.forEach(([e]) => { html += `<button type="button" class="emoji-btn" data-e="${e}">${e}</button>`; });
+    html += `</div>`;
+  });
+  wrap.innerHTML = html || `<div class="backup-empty">Ningún emoji coincide con esa búsqueda.</div>`;
+  wrap.querySelectorAll(".emoji-btn").forEach(btn => btn.addEventListener("click", () => {
+    if (iconEditIndex === null) return;
+    workingCategories[iconEditIndex].emoji = btn.dataset.e;
+    workingCategories[iconEditIndex].image = null;
+    closeOverlay("catIconOverlay");
+    renderCatEditList();
+  }));
+}
+$("#emojiSearchInput").addEventListener("input", (e) => renderEmojiGrid(e.target.value));
+
+function renderIconImagePanel(){
+  if (iconEditIndex === null) return;
+  const cat = workingCategories[iconEditIndex];
+  const prev = $("#iconImagePreview");
+  if (cat && cat.image){
+    prev.innerHTML = `<img src="${cat.image}" alt="">`;
+    $("#removeIconImageBtn").hidden = false;
+  } else {
+    prev.innerHTML = `<span class="sin-foto">🖼️</span>`;
+    $("#removeIconImageBtn").hidden = true;
+  }
+}
+
+$("#iconImageUploadBtn").addEventListener("click", () => $("#iconImageInput").click());
+$("#iconImageInput").addEventListener("change", async (e) => {
+  const file = (e.target.files || [])[0];
+  e.target.value = "";
+  if (!file || iconEditIndex === null) return;
+  try {
+    const dataUrl = await compressSquareImage(file, 320, 0.85);
+    workingCategories[iconEditIndex].image = dataUrl;
+    renderIconImagePanel();
+  } catch (err) {
+    toast("No se pudo cargar esa imagen.");
+  }
+});
+
+/* pegar una imagen de categoría por link, en vez de subirla */
+$("#iconImageUrlBtn").addEventListener("click", () => {
+  if (iconEditIndex === null) return;
+  const input = $("#iconImageUrlInput");
+  const val = input.value.trim();
+  if (!val) return;
+  if (!/^https?:\/\/.+/i.test(val)){
+    toast("Pega un link que empiece con http:// o https://");
+    return;
+  }
+  workingCategories[iconEditIndex].image = val;
+  input.value = "";
+  renderIconImagePanel();
+});
+$("#iconImageUrlInput").addEventListener("keydown", (e) => { if (e.key === "Enter"){ e.preventDefault(); $("#iconImageUrlBtn").click(); } });
+
+$("#removeIconImageBtn").addEventListener("click", () => {
+  if (iconEditIndex === null) return;
+  workingCategories[iconEditIndex].image = null;
+  renderIconImagePanel();
+});
+
+$("#iconPickerDoneBtn").addEventListener("click", () => {
+  closeOverlay("catIconOverlay");
+  renderCatEditList();
+});
+
+/* =====================================================================
    RESPALDOS AUTOMÁTICOS — ver y restaurar copias de seguridad (solo admin)
    El sitio ya guarda respaldos solo (ver worker.js); esto solo los muestra
    y permite recuperar lo que se haya borrado sin querer.
@@ -1159,11 +1558,15 @@ function formatBackupDate(ms){
 }
 
 async function openBackupsViewer(){
+  openOverlay("backupsOverlay");
+  await refreshBackupsList();
+}
+
+async function refreshBackupsList(){
   const listEl = $("#backupList");
   const msgEl = $("#backupsMsg");
   msgEl.textContent = "";
   listEl.innerHTML = `<div class="backup-empty">Cargando…</div>`;
-  openOverlay("backupsOverlay");
   try {
     const res = await fetch(`${WORKER_URL}/respaldos`);
     const data = await res.json();
@@ -1178,16 +1581,79 @@ async function openBackupsViewer(){
           <span class="backup-row-date">📅 ${formatBackupDate(b.createdAt)}</span>
           <span class="backup-row-count">${b.count} producto${b.count === 1 ? "" : "s"} guardados</span>
         </div>
-        <button type="button" class="backup-restore-btn" data-id="${b.id}">Restaurar</button>
+        <div class="backup-row-btns">
+          <button type="button" class="backup-download-btn" data-id="${b.id}">⬇️ Descargar</button>
+          <button type="button" class="backup-restore-btn" data-id="${b.id}">Restaurar</button>
+        </div>
       </div>
     `).join("");
     listEl.querySelectorAll(".backup-restore-btn").forEach(btn => btn.addEventListener("click", () => restoreBackup(btn.dataset.id)));
+    listEl.querySelectorAll(".backup-download-btn").forEach(btn => btn.addEventListener("click", () => downloadBackup(btn.dataset.id)));
   } catch (err) {
     listEl.innerHTML = "";
     msgEl.style.color = "var(--rojo-oscuro)";
     msgEl.textContent = "No se pudo conectar con el servidor. Revisa tu internet.";
   }
 }
+
+async function downloadBackup(id){
+  const msgEl = $("#backupsMsg");
+  msgEl.style.color = "var(--tinta-suave)";
+  msgEl.textContent = "Preparando descarga…";
+  try {
+    const res = await fetch(`${WORKER_URL}/respaldo?id=${encodeURIComponent(id)}`);
+    const data = await res.json();
+    if (!data.ok){
+      msgEl.style.color = "var(--rojo-oscuro)";
+      msgEl.textContent = data.error || "No se pudo descargar ese respaldo.";
+      return;
+    }
+    const blob = new Blob([JSON.stringify({ createdAt: data.createdAt, products: data.products }, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `respaldo-juguete-oferta-${formatBackupDate(data.createdAt).replace(/[\s,:]+/g, "-")}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+    msgEl.textContent = "";
+  } catch (err) {
+    msgEl.style.color = "var(--rojo-oscuro)";
+    msgEl.textContent = "No se pudo conectar con el servidor. Revisa tu internet.";
+  }
+}
+
+$("#createBackupBtn").addEventListener("click", async () => {
+  const btn = $("#createBackupBtn");
+  const msgEl = $("#backupsMsg");
+  const prevText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = "Creando…";
+  msgEl.textContent = "";
+  try {
+    const res = await fetch(`${WORKER_URL}/crear-respaldo`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: getAdminPassword() }),
+    });
+    if (res.status === 401){ closeOverlay("backupsOverlay"); handleAuthError(); return; }
+    const data = await res.json();
+    if (!data.ok){
+      msgEl.style.color = "var(--rojo-oscuro)";
+      msgEl.textContent = data.error || "No se pudo crear el respaldo.";
+    } else {
+      toast("Respaldo creado ✅");
+      await refreshBackupsList();
+    }
+  } catch (err) {
+    msgEl.style.color = "var(--rojo-oscuro)";
+    msgEl.textContent = "No se pudo conectar con el servidor. Revisa tu internet.";
+  } finally {
+    btn.disabled = false;
+    btn.textContent = prevText;
+  }
+});
 
 async function restoreBackup(id){
   if (!confirm("¿Restaurar este respaldo? Esto recupera los productos que se hayan borrado desde entonces. Lo que sigue en el catálogo no se toca.")) return;
@@ -1260,7 +1726,7 @@ function renderCard(p){
       ${agotado ? `<span class="badge agotado-tag">Agotado</span>` : ""}
     </div>
     <div class="card-body">
-      <span class="card-cat-pill">${cat.emoji} ${cat.label}</span>
+      <span class="card-cat-pill">${catIconHTML(cat)} ${cat.label}</span>
       <div class="card-name">${p.name}</div>
       <div class="card-price-row">
         <div class="card-price">${money(p.price)}</div>
@@ -1521,7 +1987,7 @@ function renderPedidoView(items){
         <img src="${(p.images && p.images[0]) || ""}" alt="">
         <div class="pedido-item-info">
           <div class="n">${p.name}${qty > 1 ? ` ×${qty}` : ""}</div>
-          <div class="cat">${info.emoji} ${info.label}</div>
+          <div class="cat">${catIconHTML(info)} ${info.label}</div>
           <div class="p">${money(subtotal)}</div>
         </div>
         <button type="button" class="pedido-sold-btn" data-id="${p.id}" data-qty="${qty}">Marcar como vendido</button>
@@ -1672,7 +2138,7 @@ function updateQvInfo(){
   const agotado = stock <= 0;
   const cat = catInfo(p.category);
   const stockInfo = stockLabel(stock);
-  $("#qvCat").textContent = `${cat.emoji} ${cat.label}`;
+  $("#qvCat").innerHTML = `${catIconHTML(cat)} ${cat.label}`;
   $("#qvName").textContent = p.name;
   $("#qvPrice").textContent = money(p.price);
   $("#qvStock").textContent = stockInfo.text;
@@ -1792,7 +2258,7 @@ function handleAuthError(){
 function renderCatPickGrid(selected){
   const grid = $("#catPickGrid");
   grid.innerHTML = CATEGORIES.map(c => `
-    <button type="button" class="cat-pick ${c.id===selected?'sel':''}" data-cat="${c.id}">${c.emoji} ${c.label}</button>
+    <button type="button" class="cat-pick ${c.id===selected?'sel':''}" data-cat="${c.id}">${catIconHTML(c)} ${c.label}</button>
   `).join("");
   grid.querySelectorAll(".cat-pick").forEach(btn => btn.addEventListener("click", () => {
     grid.querySelectorAll(".cat-pick").forEach(b => b.classList.remove("sel"));
@@ -1989,6 +2455,33 @@ function compressImage(file){
         const ctx = canvas.getContext("2d");
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         resolve(canvas.toDataURL("image/jpeg", 0.72));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+/* como compressImage, pero recorta al centro para dejar la imagen cuadrada
+   (1:1) — se usa para los íconos de categoría, que se ven como cuadritos
+   en la barra y en la cuadrícula "Ver todas" */
+function compressSquareImage(file, size = 320, quality = 0.85){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = reject;
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = reject;
+      img.onload = () => {
+        const side = Math.min(img.width, img.height);
+        const sx = (img.width - side) / 2;
+        const sy = (img.height - side) / 2;
+        const canvas = document.createElement("canvas");
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, sx, sy, side, side, 0, 0, size, size);
+        resolve(canvas.toDataURL("image/jpeg", quality));
       };
       img.src = reader.result;
     };
