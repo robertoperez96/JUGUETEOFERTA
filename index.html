@@ -162,13 +162,14 @@
   .cat-tab:active{transform:scale(.96);}
 
   /* botón (solo administrador) para reordenar/renombrar categorías */
-  .cat-edit-trigger{display:none;}
-  body.admin-mode .cat-edit-trigger{
-    display:inline-flex;align-items:center;gap:6px;margin:10px 0 0;padding:8px 14px;
+  .admin-tools-row{display:none;gap:8px;flex-wrap:wrap;margin:10px 0 0;}
+  body.admin-mode .admin-tools-row{display:flex;}
+  .admin-tool-btn{
+    display:inline-flex;align-items:center;gap:6px;padding:8px 14px;
     border-radius:999px;border:2px dashed var(--borde-fuerte);background:var(--blanco);
     color:var(--tinta-suave);font-weight:800;font-size:12.5px;
   }
-  .cat-edit-trigger:active{transform:scale(.96);}
+  .admin-tool-btn:active{transform:scale(.96);}
 
   /* ---------- modal: editar categorías (orden y nombres) ---------- */
   .cat-edit-hint{font-size:13px;color:var(--tinta-suave);font-weight:700;margin-top:4px;}
@@ -191,6 +192,23 @@
   }
   .cat-edit-arrows button:disabled{opacity:.3;}
   .cat-edit-arrows button:active:not(:disabled){transform:scale(.9);}
+
+  /* ---------- modal: respaldos automáticos ---------- */
+  .backup-hint{font-size:13px;color:var(--tinta-suave);font-weight:700;margin-top:4px;}
+  .backup-list{display:flex;flex-direction:column;gap:8px;margin-top:14px;max-height:50vh;overflow-y:auto;}
+  .backup-empty{font-size:13.5px;color:var(--tinta-suave);font-weight:700;padding:14px 4px;text-align:center;}
+  .backup-row{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    background:var(--blanco);border:2px solid var(--borde);border-radius:12px;padding:10px 12px;
+  }
+  .backup-row-info{display:flex;flex-direction:column;gap:2px;min-width:0;}
+  .backup-row-date{font-weight:800;font-size:13.5px;color:var(--tinta);}
+  .backup-row-count{font-size:12px;color:var(--tinta-suave);font-weight:700;}
+  .backup-restore-btn{
+    flex-shrink:0;padding:8px 12px;border-radius:9px;border:2px solid var(--azul);
+    background:rgba(46,168,224,.12);color:var(--azul-oscuro);font-weight:800;font-size:12.5px;
+  }
+  .backup-restore-btn:active{transform:scale(.95);}
 
   /* ---------- catálogo ---------- */
   main{padding:22px 0 40px;}
@@ -530,8 +548,9 @@
 <nav class="cat-nav">
   <div class="wrap cat-nav-inner" id="catNav"></div>
 </nav>
-<div class="wrap">
-  <button type="button" id="editCategoriesBtn" class="cat-edit-trigger">⚙️ Editar categorías</button>
+<div class="wrap admin-tools-row">
+  <button type="button" id="editCategoriesBtn" class="admin-tool-btn">⚙️ Editar categorías</button>
+  <button type="button" id="viewBackupsBtn" class="admin-tool-btn">🗄️ Respaldos</button>
 </div>
 
 <main class="wrap">
@@ -679,6 +698,22 @@
       <div class="form-actions">
         <button class="btn btn-secondary" data-close="categoriesOverlay">Cancelar</button>
         <button class="btn btn-primary" id="categoriesSaveBtn">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============== overlay: respaldos automáticos (solo administrador) ============== -->
+<div id="backupsOverlay" class="overlay">
+  <div class="sheet-wrap">
+    <div class="sheet" id="backupsSheet">
+      <button class="close-x" data-close="backupsOverlay">✕</button>
+      <h2>🗄️ Respaldos</h2>
+      <div class="backup-hint">Cada cierto tiempo el sitio guarda una copia de seguridad de todos los productos, por si alguien los borra sin querer. "Restaurar" solo recupera los productos que ya no están — no toca ni borra nada de lo que sigue en el catálogo.</div>
+      <div id="backupList" class="backup-list"></div>
+      <div class="form-msg" id="backupsMsg"></div>
+      <div class="form-actions">
+        <button class="btn btn-secondary" data-close="backupsOverlay">Cerrar</button>
       </div>
     </div>
   </div>
@@ -1055,6 +1090,78 @@ $("#categoriesSaveBtn").addEventListener("click", async () => {
     msgEl.textContent = "No se pudo conectar con el servidor. Revisa tu internet.";
   }
 });
+
+/* =====================================================================
+   RESPALDOS AUTOMÁTICOS — ver y restaurar copias de seguridad (solo admin)
+   El sitio ya guarda respaldos solo (ver worker.js); esto solo los muestra
+   y permite recuperar lo que se haya borrado sin querer.
+   ===================================================================== */
+function formatBackupDate(ms){
+  try {
+    return new Date(ms).toLocaleString("es-MX", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  } catch {
+    return "";
+  }
+}
+
+async function openBackupsViewer(){
+  const listEl = $("#backupList");
+  const msgEl = $("#backupsMsg");
+  msgEl.textContent = "";
+  listEl.innerHTML = `<div class="backup-empty">Cargando…</div>`;
+  openOverlay("backupsOverlay");
+  try {
+    const res = await fetch(`${WORKER_URL}/respaldos`);
+    const data = await res.json();
+    const backups = Array.isArray(data.backups) ? data.backups : [];
+    if (!backups.length){
+      listEl.innerHTML = `<div class="backup-empty">Todavía no hay respaldos guardados. Se van creando solos cada cierto tiempo mientras el sitio recibe visitas.</div>`;
+      return;
+    }
+    listEl.innerHTML = backups.map(b => `
+      <div class="backup-row">
+        <div class="backup-row-info">
+          <span class="backup-row-date">📅 ${formatBackupDate(b.createdAt)}</span>
+          <span class="backup-row-count">${b.count} producto${b.count === 1 ? "" : "s"} guardados</span>
+        </div>
+        <button type="button" class="backup-restore-btn" data-id="${b.id}">Restaurar</button>
+      </div>
+    `).join("");
+    listEl.querySelectorAll(".backup-restore-btn").forEach(btn => btn.addEventListener("click", () => restoreBackup(btn.dataset.id)));
+  } catch (err) {
+    listEl.innerHTML = "";
+    msgEl.style.color = "var(--rojo-oscuro)";
+    msgEl.textContent = "No se pudo conectar con el servidor. Revisa tu internet.";
+  }
+}
+
+async function restoreBackup(id){
+  if (!confirm("¿Restaurar este respaldo? Esto recupera los productos que se hayan borrado desde entonces. Lo que sigue en el catálogo no se toca.")) return;
+  const msgEl = $("#backupsMsg");
+  msgEl.style.color = "var(--tinta-suave)";
+  msgEl.textContent = "Restaurando…";
+  try {
+    const res = await fetch(`${WORKER_URL}/restaurar-respaldo`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: getAdminPassword(), id }),
+    });
+    if (res.status === 401){ closeOverlay("backupsOverlay"); handleAuthError(); return; }
+    const data = await res.json();
+    if (!data.ok){ msgEl.style.color = "var(--rojo-oscuro)"; msgEl.textContent = data.error || "No se pudo restaurar."; return; }
+    msgEl.style.color = "var(--verde-oscuro)";
+    msgEl.textContent = data.restored > 0
+      ? `Listo: se recuperaron ${data.restored} producto${data.restored === 1 ? "" : "s"} ✅`
+      : "No había productos borrados que recuperar de este respaldo.";
+    toast("Respaldo restaurado ✅");
+    await loadProducts();
+  } catch (err) {
+    msgEl.style.color = "var(--rojo-oscuro)";
+    msgEl.textContent = "No se pudo conectar con el servidor. Revisa tu internet.";
+  }
+}
+
+$("#viewBackupsBtn").addEventListener("click", openBackupsViewer);
 
 /* =====================================================================
    RENDER: catálogo de productos
