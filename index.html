@@ -39,6 +39,7 @@
     --amarillo:#FFC93C; --amarillo-oscuro:#F0AE0E;
     --azul:#2EA8E0; --azul-oscuro:#1C86BA;
     --verde:#3DDC84; --verde-oscuro:#22B368;
+    --morado:#8B5CF6; --morado-oscuro:#6D3FD1;
     --whatsapp:#25D366; --whatsapp-oscuro:#1DA851;
     --tinta:#232946; --tinta-suave:#5B6178;
     --crema:#FFFCF5; --blanco:#FFFFFF;
@@ -193,6 +194,28 @@
   .cat-all-card .ct{font-size:11px;font-weight:700;color:var(--tinta-suave);}
   .cat-all-card:active{transform:scale(.96);}
 
+  /* ---------- barra de ordenar / filtrar (visible para todos, en todas las categorías) ---------- */
+  .catalog-toolbar{display:flex;justify-content:flex-end;margin-top:14px;}
+  .sort-filter-btn{
+    display:inline-flex;align-items:center;gap:7px;padding:10px 16px;border-radius:999px;border:none;
+    background:linear-gradient(135deg,var(--morado),var(--morado-oscuro));color:#fff;font-weight:800;font-size:13px;
+    box-shadow:0 8px 18px -8px rgba(109,63,209,.5);
+  }
+  .sort-filter-btn:active{transform:scale(.96);}
+  .sort-filter-btn .chev{font-size:10px;opacity:.85;}
+
+  /* ---------- modal: ordenar y filtrar ---------- */
+  .sort-option-list{display:flex;flex-direction:column;gap:8px;margin-top:14px;}
+  .sort-option-row{
+    display:flex;align-items:center;gap:10px;padding:13px 14px;border-radius:12px;border:2px solid var(--borde);
+    background:var(--blanco);font-weight:800;font-size:14px;color:var(--tinta);text-align:left;
+  }
+  .sort-option-row .ic{font-size:17px;flex-shrink:0;}
+  .sort-option-row .check{margin-left:auto;font-size:15px;opacity:0;color:var(--morado-oscuro);}
+  .sort-option-row.sel{border-color:var(--morado);background:rgba(139,92,246,.08);}
+  .sort-option-row.sel .check{opacity:1;}
+  .sort-option-row:active{transform:scale(.98);}
+
   /* botón (solo administrador) para reordenar/renombrar categorías */
   .admin-tools-row{display:none;gap:8px;flex-wrap:wrap;margin:10px 0 0;}
   body.admin-mode .admin-tools-row{display:flex;}
@@ -344,6 +367,7 @@
     transform:translate(-50%,-50%);background:rgba(35,41,70,.88);color:#fff;font-size:13px;
     font-weight:800;padding:8px 16px;border-radius:999px;letter-spacing:.02em;
   }
+  .badge.oferta-tag{background:linear-gradient(135deg,var(--amarillo),var(--amarillo-oscuro));color:#4a3400;}
   .fotos-count{position:absolute;bottom:8px;right:8px;background:rgba(35,41,70,.72);color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;}
   .card-nav-arrow{
     position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.88);border:none;
@@ -365,7 +389,8 @@
   .card-name{font-family:var(--fuente-titulo);font-weight:600;font-size:14.5px;line-height:1.22;
     display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
   .card-price-row{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-top:2px;}
-  .card-price{font-family:var(--fuente-titulo);font-weight:700;font-size:18px;color:var(--rojo-oscuro);}
+  .card-price{font-family:var(--fuente-titulo);font-weight:700;font-size:18px;color:var(--rojo-oscuro);display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;}
+  .card-price .price-old{font-family:var(--fuente-cuerpo);font-size:11.5px;font-weight:700;color:var(--tinta-suave);text-decoration:line-through;}
   .card-stock{font-size:11px;font-weight:800;white-space:nowrap;}
   .card-stock.ok{color:var(--verde-oscuro);}
   .card-stock.pocas{color:var(--amarillo-oscuro);}
@@ -448,6 +473,19 @@
   .field input:focus, .field select:focus{outline:none;border-color:var(--azul);}
   .field-row{display:flex;gap:12px;}
   .field-row .field{flex:1;}
+
+  /* botón para activar/desactivar que un producto esté "en oferta" */
+  .sale-toggle-btn{
+    display:flex;align-items:center;gap:10px;width:100%;padding:12px 14px;border-radius:12px;
+    border:2px solid var(--borde);background:var(--blanco);color:var(--tinta-suave);font-weight:800;font-size:13.5px;
+  }
+  .sale-toggle-btn .dot{
+    width:20px;height:20px;border-radius:999px;border:2px solid currentColor;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;font-size:11px;color:inherit;
+  }
+  .sale-toggle-btn.on{border-color:var(--amarillo-oscuro);background:rgba(240,174,14,.14);color:#7a5600;}
+  .sale-toggle-btn.on .dot{background:var(--amarillo-oscuro);border-color:var(--amarillo-oscuro);color:#fff;}
+  .sale-toggle-btn:active{transform:scale(.98);}
 
   .photo-picker{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px;}
   .photo-thumb{position:relative;width:78px;height:78px;border-radius:12px;overflow:hidden;border:2px solid var(--borde);}
@@ -705,6 +743,12 @@
   <button type="button" id="openOptimizeBtn" class="admin-tool-btn">⚡ Optimizar fotos</button>
 </div>
 
+<div class="wrap catalog-toolbar">
+  <button type="button" id="sortFilterBtn" class="sort-filter-btn">
+    <span class="ic">🔀</span> <span id="sortFilterLabel">Recién añadidos</span> <span class="chev">▾</span>
+  </button>
+</div>
+
 <main class="wrap">
   <div class="view-toggle" id="viewToggle">
     <span class="view-toggle-label">Ver:</span>
@@ -784,9 +828,22 @@
         <input type="text" id="fieldName" placeholder="Ej. Carro de control remoto">
       </div>
 
+      <div class="field">
+        <button type="button" class="sale-toggle-btn" id="saleToggleBtn" aria-pressed="false">
+          <span class="dot">✓</span> 🏷️ Producto en oferta
+        </button>
+      </div>
+
+      <div class="field-row" id="oldPriceRow" hidden>
+        <div class="field">
+          <label>Precio anterior (se muestra tachado)</label>
+          <input type="number" id="fieldOldPrice" placeholder="0" min="0" inputmode="decimal">
+        </div>
+      </div>
+
       <div class="field-row">
         <div class="field">
-          <label>Precio (MXN)</label>
+          <label id="fieldPriceLabel">Precio (MXN)</label>
           <input type="number" id="fieldPrice" placeholder="0" min="0" inputmode="decimal">
         </div>
         <div class="field">
@@ -846,6 +903,17 @@
       <h2>🗂️ Categorías</h2>
       <div class="cat-edit-hint">Toca una categoría para ir directo a ella.</div>
       <div id="catAllGrid" class="cat-all-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============== overlay: ordenar y filtrar ============== -->
+<div id="sortOverlay" class="overlay">
+  <div class="sheet-wrap">
+    <div class="sheet" id="sortSheet">
+      <button class="close-x" data-close="sortOverlay">✕</button>
+      <h2>🔀 Ordenar y filtrar</h2>
+      <div id="sortOptionList" class="sort-option-list"></div>
     </div>
   </div>
 </div>
@@ -1113,6 +1181,7 @@ let products = [];
 let cart = {};              // { id: qty }
 let activeCat = "todos";
 let searchText = "";
+let currentSort = localStorage.getItem("jomx_sort") || "recientes";
 let pendingImages = [];     // fotos (dataURL o links) del producto que se está agregando/editando
 let editingProduct = null;  // producto que se está editando (null = agregar nuevo)
 let currentQvProduct = null; // producto abierto en la vista rápida
@@ -1124,6 +1193,13 @@ let deepLinkHandled = false;
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 const money = (n) => "$" + Math.round(Number(n)||0).toLocaleString("es-MX");
+/* true si un producto tiene una oferta válida (precio anterior mayor al actual) */
+const isOnSale = (p) => !!(p && p.onSale && p.oldPrice != null && Number(p.oldPrice) > Number(p.price));
+/* arma el precio para mostrar: con el anterior tachado si está en oferta */
+function priceHTML(p){
+  if (!isOnSale(p)) return money(p.price);
+  return `<span class="price-old">${money(p.oldPrice)}</span><span class="price-now">${money(p.price)}</span>`;
+}
 
 /* ---------------- cargar carrito guardado ---------------- */
 try { cart = JSON.parse(localStorage.getItem("jomx_cart") || "{}"); } catch { cart = {}; }
@@ -1858,21 +1934,73 @@ $("#startOptimizeBtn").addEventListener("click", async () => {
    RENDER: catálogo de productos
    ===================================================================== */
 function currentList(){
-  return products.filter(p => {
+  let list = products.filter(p => {
     const matchCat = activeCat === "todos" || p.category === activeCat;
     const matchSearch = !searchText || p.name.toLowerCase().includes(searchText);
-    return matchCat && matchSearch;
+    const matchSale = currentSort !== "ofertas" || isOnSale(p);
+    return matchCat && matchSearch && matchSale;
   });
+  // "products" ya viene del servidor ordenado del más nuevo al más viejo,
+  // así que "recientes" y "ofertas" no necesitan reordenar nada más.
+  if (currentSort === "precio_asc") list = [...list].sort((a,b) => Number(a.price) - Number(b.price));
+  else if (currentSort === "precio_desc") list = [...list].sort((a,b) => Number(b.price) - Number(a.price));
+  else if (currentSort === "alfabetico") list = [...list].sort((a,b) => a.name.localeCompare(b.name, "es"));
+  return list;
 }
 
 function render(){
   const list = currentList();
   const grid = $("#grid");
-  $("#emptyState").hidden = products.length > 0;
+  const emptyEl = $("#emptyState");
+  emptyEl.hidden = list.length > 0;
+  if (!list.length){
+    emptyEl.innerHTML = !products.length
+      ? `<span class="emoji">🧸</span><b>Aún no hay productos en el catálogo.</b><br>Usa el botón rojo con el "+" para agregar el primero.`
+      : currentSort === "ofertas"
+        ? `<span class="emoji">🏷️</span><b>Todavía no hay productos en oferta.</b><br>Actívalos desde "Editar producto".`
+        : `<span class="emoji">🔎</span><b>No encontramos nada con esa búsqueda o categoría.</b>`;
+  }
   grid.innerHTML = "";
   list.forEach(p => grid.appendChild(renderCard(p)));
   updateCartUI();
 }
+
+/* =====================================================================
+   ORDENAR Y FILTRAR — botón visible en todas las categorías, para ver el
+   catálogo por precio, alfabético, lo más nuevo, o solo lo que está en
+   oferta.
+   ===================================================================== */
+const SORT_OPTIONS = [
+  { id: "recientes",   label: "Recién añadidos",          icon: "🆕" },
+  { id: "precio_asc",  label: "Precio: más bajo primero",  icon: "⬆️" },
+  { id: "precio_desc", label: "Precio: más alto primero",  icon: "⬇️" },
+  { id: "alfabetico",  label: "Alfabético (A-Z)",           icon: "🔤" },
+  { id: "ofertas",     label: "Solo ofertas",               icon: "🏷️" },
+];
+
+function updateSortButtonLabel(){
+  const opt = SORT_OPTIONS.find(o => o.id === currentSort) || SORT_OPTIONS[0];
+  $("#sortFilterLabel").textContent = opt.label;
+}
+updateSortButtonLabel();
+
+function openSortSheet(){
+  const wrap = $("#sortOptionList");
+  wrap.innerHTML = SORT_OPTIONS.map(o => `
+    <button type="button" class="sort-option-row ${currentSort===o.id?'sel':''}" data-sort="${o.id}">
+      <span class="ic">${o.icon}</span> ${o.label} <span class="check">✓</span>
+    </button>
+  `).join("");
+  wrap.querySelectorAll(".sort-option-row").forEach(btn => btn.addEventListener("click", () => {
+    currentSort = btn.dataset.sort;
+    localStorage.setItem("jomx_sort", currentSort);
+    updateSortButtonLabel();
+    closeOverlay("sortOverlay");
+    render();
+  }));
+  openOverlay("sortOverlay");
+}
+$("#sortFilterBtn").addEventListener("click", openSortSheet);
 
 function renderCard(p){
   const stock = Number(p.stock)||0;
@@ -1894,13 +2022,14 @@ function renderCard(p){
         <button type="button" class="card-nav-arrow next" aria-label="Foto siguiente">›</button>
         <span class="fotos-count">📷 1/${p.images.length}</span>
       ` : ""}
+      ${isOnSale(p) ? `<span class="badge oferta-tag">🏷️ Oferta</span>` : ""}
       ${agotado ? `<span class="badge agotado-tag">Agotado</span>` : ""}
     </div>
     <div class="card-body">
       <span class="card-cat-pill">${catIconHTML(cat)} ${cat.label}</span>
       <div class="card-name">${p.name}</div>
       <div class="card-price-row">
-        <div class="card-price">${money(p.price)}</div>
+        <div class="card-price">${priceHTML(p)}</div>
         <div class="card-stock ${stockInfo.cls}">${stockInfo.text}</div>
       </div>
       <div class="card-actions">
@@ -2311,7 +2440,7 @@ function updateQvInfo(){
   const stockInfo = stockLabel(stock);
   $("#qvCat").innerHTML = `${catIconHTML(cat)} ${cat.label}`;
   $("#qvName").textContent = p.name;
-  $("#qvPrice").textContent = money(p.price);
+  $("#qvPrice").innerHTML = isOnSale(p) ? `${priceHTML(p)} <span class="badge oferta-tag" style="position:static;display:inline-flex;vertical-align:middle;">🏷️ Oferta</span>` : priceHTML(p);
   $("#qvStock").textContent = stockInfo.text;
   $("#qvStock").className = "card-stock " + stockInfo.cls;
   $("#qvQty").textContent = qvQty;
@@ -2663,6 +2792,19 @@ function compressSquareImage(file, size = 320, quality = 0.85){
   });
 }
 
+/* botón "🏷️ Producto en oferta": muestra/oculta el campo de precio
+   anterior y cambia la etiqueta del precio normal a "precio de oferta" */
+function setSaleToggle(on){
+  const btn = $("#saleToggleBtn");
+  btn.classList.toggle("on", on);
+  btn.setAttribute("aria-pressed", on ? "true" : "false");
+  $("#oldPriceRow").hidden = !on;
+  $("#fieldPriceLabel").textContent = on ? "Precio de oferta (nuevo)" : "Precio (MXN)";
+}
+$("#saleToggleBtn").addEventListener("click", () => {
+  setSaleToggle(!$("#saleToggleBtn").classList.contains("on"));
+});
+
 function openProductForm(product){
   editingProduct = product;
   pendingImages = product && product.images ? [...product.images] : [];
@@ -2670,6 +2812,8 @@ function openProductForm(product){
   $("#fieldName").value = product ? product.name : "";
   $("#fieldPrice").value = product ? product.price : "";
   $("#fieldStock").value = product ? product.stock : 1;
+  $("#fieldOldPrice").value = product && product.oldPrice != null ? product.oldPrice : "";
+  setSaleToggle(!!(product && product.onSale));
   $("#productMsg").textContent = "";
   $("#photoUrlInput").value = "";
   $("#productDeleteBtn").hidden = !product;
@@ -2683,10 +2827,13 @@ $("#productSaveBtn").addEventListener("click", async () => {
   const price = Number($("#fieldPrice").value);
   const stock = Math.max(0, parseInt($("#fieldStock").value || "0"));
   const category = getSelectedCategory();
+  const onSale = $("#saleToggleBtn").classList.contains("on");
+  const oldPrice = onSale ? Number($("#fieldOldPrice").value) : null;
   const msgEl = $("#productMsg");
 
   if (!name){ msgEl.textContent = "Falta el nombre del juguete."; return; }
   if (!price || price <= 0){ msgEl.textContent = "Falta el precio."; return; }
+  if (onSale && (!oldPrice || oldPrice <= price)){ msgEl.textContent = "El precio anterior debe ser mayor al precio de oferta."; return; }
   if (WORKER_URL.includes("TU-WORKER")){ msgEl.textContent = "Falta configurar WORKER_URL en el código (ver worker.js)."; return; }
 
   msgEl.style.color = "var(--tinta-suave)";
@@ -2704,6 +2851,7 @@ $("#productSaveBtn").addEventListener("click", async () => {
     const product = {
       id: editingProduct ? editingProduct.id : undefined,
       name, price, stock, category, images: uploadedImages,
+      onSale, oldPrice: onSale ? oldPrice : null,
     };
 
     const res = await fetch(`${WORKER_URL}/guardar-producto`, {
